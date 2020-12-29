@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- See Relax specification: Ghidra/Framework/SoftwareModeling/data/languages/processor_spec.rxg -->
+
+<processor_spec>
+  <programcounter register="PC"/>
+  <volatile outputop="reg_write" inputop="reg_read">
+    <range space="ram" first="0xe0000" last="0xe00ff"/> <!-- xcbase xdbase -->
+  </volatile>
+</processor_spec>

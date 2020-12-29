@@ -1,0 +1,4098 @@
+###################################
+#
+## 8-bit Data Transfer Instructions
+#
+###################################
+
+# Reg = Reg
+macro movRegToReg(dst,src) {
+    dst = src;
+}
+
+# Reg = Imm
+macro movImmToReg(dst,src) {
+    dst = src;
+}
+
+# Reg = Mem
+macro movMemToReg(dst,src) {
+    dst = *:1 src;
+}
+
+# Mem = Reg
+macro movRegToMem(dst,src) {
+    *:1 dst = src;
+}
+
+# Mem = Imm
+macro movImmToMem(dst,src) {
+    *:1 dst = src;
+}
+
+# Move byte to/from stack
+
+macro movImmToMemS(dst,src) {
+    *[stackarea]:1 dst = src;
+}
+
+macro movRegToMemS(dst,src) {
+    *[stackarea]:1 dst = dst;
+}
+
+macro movMemToRegS(dst,src) {
+    dst = *[stackarea]:1 src;
+}
+
+## Exchange macros
+
+macro xchRegWithReg(dst,src) {
+    local tmp = src;
+    src = dst;
+    dst = tmp;
+}
+
+macro xchRegWithMem(dst,src) {
+    local tmp = *:1 src;
+    *:1 src = dst;
+    dst = tmp;
+}
+
+# MOV X, #byte
+:MOV X,ImmByte is byte1=0x50; ImmByte & X { X = ImmByte; }
+
+# MOV A, #byte
+:MOV A,ImmByte is byte1=0x51; ImmByte & A { A = ImmByte; }
+
+# MOV C, #byte
+:MOV C,ImmByte is byte1=0x52; ImmByte & C { C = ImmByte; }
+
+# MOV B, #byte
+:MOV B,ImmByte is byte1=0x53; ImmByte & B { B = ImmByte; }
+
+# MOV E, #byte
+:MOV E,ImmByte is byte1=0x54; ImmByte & E { E = ImmByte; }
+
+# MOV D, #byte
+:MOV D,ImmByte is byte1=0x55; ImmByte & D { D = ImmByte; }
+
+# MOV L, #byte
+:MOV L,ImmByte is byte1=0x56; ImmByte & L { L = ImmByte; }
+
+# MOV H, #byte
+:MOV H,ImmByte is byte1=0x57; ImmByte & H { H = ImmByte; }
+
+# MOV saddr, #byte
+:MOV ShortAddr,ImmByte is byte1=0xCD; ShortAddr; ImmByte { movImmToMem(ShortAddr,ImmByte); }
+
+# MOV sfr, #byte
+:MOV Sfr,ImmByte is byte1=0xCE; Sfr; ImmByte { movImmToMem(Sfr,ImmByte); }
+
+# MOV !addr16,#byte
+:MOV AbsAddr16,ImmByte is byte1=0xCF; AbsAddr16; ImmByte { movImmToMem(AbsAddr16,ImmByte); }
+
+# MOV A, X
+:MOV A,X is byte1=0x60 & A & X { A = X; }
+
+# MOV A, C
+:MOV A,C is byte1=0x62 & A & C { A = C; }
+
+# MOV A, B
+:MOV A,B is byte1=0x63 & A & B { A = B; }
+
+# MOV A, E
+:MOV A,E is byte1=0x64 & A & E { A = E; }
+
+# MOV A, D
+:MOV A,D is byte1=0x65 & A & D { A = D; }
+
+# MOV A, L
+:MOV A,L is byte1=0x66 & A & L { A = L; }
+
+# MOV A, H
+:MOV A,H is byte1=0x67 & A & H { A = H; }
+
+# MOV X, A
+:MOV X,A is byte1=0x70 & X & A { X = A; }
+
+# MOV C, A
+:MOV C,A is byte1=0x72 & C & A { C = A; }
+
+# MOV B, A
+:MOV B,A is byte1=0x73 & B & A { B = A; }
+
+# MOV E, A
+:MOV E,A is byte1=0x74 & E & A { E = A; }
+
+# MOV D, A
+:MOV D,A is byte1=0x75 & D & A { D = A; }
+
+# MOV L, A
+:MOV L,A is byte1=0x76 & L & A { L = A; }
+
+# MOV H, A
+:MOV H,A is byte1=0x77 & H & A { H = A; }
+
+# MOV A, saddr
+:MOV A,ShortAddr is byte1=0x8D; ShortAddr & A { movMemToReg(A,ShortAddr); }
+
+# MOV saddr, A
+:MOV ShortAddr,A is byte1=0x9D; ShortAddr & A { movRegToMem(ShortAddr,A); }
+
+# MOV A, sfr
+:MOV A,Sfr is byte1=0x8E; Sfr & A { movMemToReg(A,Sfr); }
+
+# MOV sfr, A
+:MOV Sfr,A is byte1=0x9E; Sfr & A { movRegToMem(Sfr,A); }
+
+# MOV A, !addr16
+:MOV A,AbsAddr16 is byte1=0x8F; AbsAddr16 & A { movMemToReg(A,AbsAddr16); }
+
+# MOV !addr16, A
+:MOV AbsAddr16,A is byte1=0x9F; AbsAddr16 & A { movRegToMem(AbsAddr16,A); }
+
+# MOV PSW, #byte
+:MOV PSW,ImmByte is byte1=0xCE; byte2=0xFA; ImmByte & PSW { PSW = ImmByte; }
+
+# MOV A, PSW
+:MOV A,PSW is byte1=0x8E; byte2=0xFA & A & PSW { A = PSW; }
+
+# MOV PSW, A
+:MOV PSW,A is byte1=0x9E; byte2=0xFA & PSW & A { PSW = A; }
+
+# MOV ES, #byte
+:MOV ES,ImmByte is byte1=0x41; ImmByte & ES { ES = ImmByte; }
+
+# MOV ES, saddr
+:MOV ES,ShortAddr is byte1=0x61; byte2=0xB8; ShortAddr & ES {}
+
+# MOV A, ES
+:MOV A,ES is byte1=0x8E; byte2=0xFD & A & ES { A = ES; }
+
+# MOV ES, A
+:MOV ES,A is byte1=0x9E; byte2=0xFD & ES & A { ES = A; }
+
+# MOV CS, #byte
+:MOV CS,ImmByte is byte1=0xCE; byte2=0xFC; ImmByte & CS { CS = ImmByte; }
+
+# MOV A, CS
+:MOV A,CS is byte1=0x8E; byte2=0xFC & A & CS { A = CS; }
+
+# MOV CS, A
+:MOV CS,A is byte1=0x9E; byte2=0xFC & CS & A { CS = A; }
+
+# MOV A, [DE]
+:MOV A,AddrDE is byte1=0x89; AddrDE & A { movMemToReg(A,AddrDE); }
+
+# MOV [DE], A
+:MOV AddrDE,A is byte1=0x99; AddrDE & A { movRegToMem(AddrDE,A); }
+
+# MOV [DE+byte],#byte
+:MOV AddrDE_byte,ImmByte is byte1=0xCA; AddrDE_byte; ImmByte { movImmToMem(AddrDE_byte,ImmByte); }
+
+# MOV A, [DE+byte]
+:MOV A,AddrDE_byte is byte1=0x8A; AddrDE_byte & A { movMemToReg(A,AddrDE_byte); }
+
+# MOV [DE+byte], A
+:MOV AddrDE_byte,A is byte1=0x9A; AddrDE_byte & A { movRegToMem(AddrDE_byte,A); }
+
+# MOV A, [HL]
+:MOV A,AddrHL is byte1=0x8B; AddrHL & A { movMemToReg(A,AddrHL); }
+
+# MOV [HL], A
+:MOV AddrHL,A is byte1=0x9B; AddrHL & A { movRegToMem(AddrHL,A); }
+
+# MOV [HL+byte],#byte
+:MOV AddrHL_byte,ImmByte is byte1=0xCC; AddrHL_byte; ImmByte { movImmToMem(AddrHL_byte,ImmByte); }
+
+# MOV A, [HL+byte]
+:MOV A,AddrHL_byte is byte1=0x8C; AddrHL_byte & A { movMemToReg(A,AddrHL_byte); }
+
+# MOV [HL+byte], A
+:MOV AddrHL_byte,A is byte1=0x9C; AddrHL_byte & A { movRegToMem(AddrHL_byte,A); }
+
+# MOV A, [HL+B]
+:MOV A,AddrHL_B is byte1=0x61; byte2=0xC9; AddrHL_B & A { movMemToReg(A,AddrHL_B); }
+
+# MOV [HL+B], A
+:MOV AddrHL_B,A is byte1=0x61; byte2=0xD9; AddrHL_B & A { movRegToMem(AddrHL_B,A); }
+
+# MOV A, [HL+C]
+:MOV A,AddrHL_C is byte1=0x61; byte2=0xE9; AddrHL_C & A { movMemToReg(A,AddrHL_C); }
+
+# MOV [HL+C], A
+:MOV AddrHL_C,A is byte1=0x61; byte2=0xF9; AddrHL_C & A { movRegToMem(AddrHL_C,A); }
+
+# MOV word[B], #byte
+:MOV AddrB_word,ImmByte is byte1=0x19; AddrB_word; ImmByte { movImmToMem(AddrB_word,ImmByte); }
+
+# MOV A, word[B]
+:MOV A,AddrB_word is byte1=0x09; AddrB_word & A { movMemToReg(A,AddrB_word); }
+
+# MOV word[B], A
+:MOV AddrB_word,A is byte1=0x18; AddrB_word & A { movRegToMem(AddrB_word,A); }
+
+# MOV word[C], #byte
+:MOV AddrC_word,ImmByte is byte1=0x38; AddrC_word; ImmByte { movImmToMem(AddrC_word,ImmByte); }
+
+# MOV A, word[C]
+:MOV A,AddrC_word is byte1=0x29; AddrC_word & A { movMemToReg(A,AddrC_word); }
+
+# MOV word[C], A
+:MOV AddrC_word,A is byte1=0x28; AddrC_word & A { movRegToMem(AddrC_word,A); }
+
+# MOV word[BC], #byte
+:MOV AddrBC_word,ImmByte is byte1=0x39; AddrBC_word; ImmByte { movImmToMem(AddrBC_word,ImmByte); }
+
+# MOV A, word[BC]
+:MOV A,AddrBC_word is byte1=0x49; AddrBC_word & A { movMemToReg(A,AddrBC_word); }
+
+# MOV word[BC], A
+:MOV AddrBC_word,A is byte1=0x48; AddrBC_word & A { movRegToMem(AddrBC_word,A); }
+
+# MOV [SP+byte], #byte
+:MOV AddrSP_byte,ImmByte is byte1=0xC8; AddrSP_byte; ImmByte { movImmToMemS(AddrSP_byte,ImmByte); }
+
+# MOV A, [SP+byte]
+:MOV A,AddrSP_byte is byte1=0x88; AddrSP_byte & A { movMemToRegS(A,AddrSP_byte); }
+
+# MOV [SP+byte], A
+:MOV AddrSP_byte,A is byte1=0x98; AddrSP_byte & A { movRegToMemS(AddrSP_byte,A); }
+
+# MOV B, saddr
+:MOV B,ShortAddr is byte1=0xE8; ShortAddr & B { movMemToReg(B,ShortAddr); }
+
+# MOV B, !addr16
+:MOV B,AbsAddr16 is byte1=0xE9; AbsAddr16 & B { movMemToReg(B,AbsAddr16); }
+
+# MOV C, saddr
+:MOV C,ShortAddr is byte1=0xF8; ShortAddr & C { movMemToReg(C,ShortAddr); }
+
+# MOV C, !addr16
+:MOV C,AbsAddr16 is byte1=0xF9; AbsAddr16 & C { movMemToReg(C,AbsAddr16); }
+
+# MOV X, saddr
+:MOV X,ShortAddr is byte1=0xD8; ShortAddr & X { movMemToReg(X,ShortAddr); }
+
+# MOV X, !addr16
+:MOV X,AbsAddr16 is byte1=0xD9; AbsAddr16 & X { movMemToReg(X,AbsAddr16); }
+
+# MOV ES:!addr16, #byte
+:MOV ESAbsAddr16,ImmByte is byte1=0x11; byte2=0xCF; ESAbsAddr16; ImmByte {}
+
+# MOV A, ES:!addr16
+:MOV A,ESAbsAddr16 is byte1=0x11; byte2=0x8F; ESAbsAddr16 & A { movMemToReg(A,ESAbsAddr16); }
+
+# MOV ES:!addr16, A
+:MOV ESAbsAddr16,A is byte1=0x11; byte2=0x9F; ESAbsAddr16 & A { movRegToMem(ESAbsAddr16,A); }
+
+# MOV A, ES:[DE]
+:MOV A,ESAddrDE is byte1=0x11; byte2=0x89; ESAddrDE & A { movMemToReg(A,ESAddrDE); }
+
+# MOV ES:[DE], A
+:MOV ESAddrDE,A is byte1=0x11; byte2=0x99; ESAddrDE & A { movRegToMem(ESAddrDE,A); }
+
+# MOV ES:[DE+byte], #byte
+:MOV ESAddrDE_byte,ImmByte is byte1=0x11; byte2=0xCA; ESAddrDE_byte; ImmByte { movImmToMem(ESAddrDE_byte,ImmByte); }
+
+# MOV A, ES:[DE+byte]
+:MOV A,ESAddrDE_byte is byte1=0x11; byte2=0x8A; ESAddrDE_byte & A { movMemToReg(A,ESAddrDE_byte); }
+
+# MOV ES:[DE+byte], A
+:MOV ESAddrDE_byte,A is byte1=0x11; byte2=0x9A; ESAddrDE_byte & A { movRegToMem(ESAddrDE_byte,A); }
+
+# MOV A, ES:[HL]
+:MOV A,ESAddrHL is byte1=0x11; byte2=0x8B; ESAddrHL & A { movMemToReg(A,ESAddrHL); }
+
+# MOV ES:[HL], A
+:MOV ESAddrHL,A is byte1=0x11; byte2=0x9B; ESAddrHL & A { movRegToMem(ESAddrHL,A); }
+
+# MOV ES:[HL+byte], #byte
+:MOV ESAddrHL_byte,ImmByte is byte1=0x11; byte2=0xCC; ESAddrHL_byte; ImmByte { movImmToMem(ESAddrHL_byte,ImmByte); }
+
+# MOV A, ES:[HL+byte]
+:MOV A,ESAddrHL_byte is byte1=0x11; byte2=0x8C; ESAddrHL_byte & A { movMemToReg(A,ESAddrHL_byte); }
+
+# MOV ES:[HL+byte], A
+:MOV ESAddrHL_byte,A is byte1=0x11; byte2=0x9C; ESAddrHL_byte & A { movRegToMem(ESAddrHL_byte,A); }
+
+# MOV A, ES:[HL+B]
+:MOV A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0xC9; ESAddrHL_B & A { movMemToReg(A,ESAddrHL_B); }
+
+# MOV ES:[HL+B], A
+:MOV ESAddrHL_B,A is byte1=0x11; byte2=0x61; byte3=0xD9; ESAddrHL_B & A { movRegToMem(ESAddrHL_B,A); }
+
+# MOV A, ES:[HL+C]
+:MOV A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xE9; ESAddrHL_C & A { movMemToReg(A,ESAddrHL_C); }
+
+# MOV ES:[HL+C], A
+:MOV ESAddrHL_C,A is byte1=0x11; byte2=0x61; byte3=0xF9; ESAddrHL_C & A { movRegToMem(ESAddrHL_C,A); }
+
+# MOV ES:word[B], #byte
+:MOV ESAddrB_word,ImmByte is byte1=0x11; byte2=0x19; ESAddrB_word; ImmByte { movImmToMem(ESAddrB_word,ImmByte); }
+
+# MOV A, ES:word[B]
+:MOV A,ESAddrB_word is byte1=0x11; byte2=0x09; ESAddrB_word & A { movMemToReg(A,ESAddrB_word); }
+
+# MOV ES:word[B], A
+:MOV ESAddrB_word,A is byte1=0x11; byte2=0x18; ESAddrB_word & A { movRegToMem(ESAddrB_word,A); }
+
+# MOV ES:word[C], #byte
+:MOV ESAddrC_word,ImmByte is byte1=0x11; byte2=0x38; ESAddrC_word; ImmByte { movImmToMem(ESAddrC_word,ImmByte); }
+
+# MOV A, ES:word[C]
+:MOV A,ESAddrC_word is byte1=0x11; byte2=0x29; ESAddrC_word & A { movMemToReg(A,ESAddrC_word); }
+
+# MOV ES:word[C], A
+:MOV ESAddrC_word,A is byte1=0x11; byte2=0x28; ESAddrC_word & A { movRegToMem(ESAddrC_word,A); }
+
+# MOV ES:word[BC], #byte
+:MOV ESAddrBC_word,ImmByte is byte1=0x11; byte2=0x39; ESAddrBC_word; ImmByte { movImmToMem(ESAddrBC_word,ImmByte); }
+
+# MOV A, ES:word[BC]
+:MOV A,ESAddrBC_word is byte1=0x11; byte2=0x49; ESAddrBC_word & A { movMemToReg(A,ESAddrBC_word); }
+
+# MOV ES:word[BC], A
+:MOV ESAddrBC_word,A is byte1=0x11; byte2=0x48; ESAddrBC_word & A { movRegToMem(ESAddrBC_word,A); }
+
+# MOV B, ES:!addr16
+:MOV B,ESAbsAddr16 is byte1=0x11; byte2=0xE9; ESAbsAddr16 & B { movMemToReg(B,ESAbsAddr16); }
+
+# MOV C, ES:!addr16
+:MOV C,ESAbsAddr16 is byte1=0x11; byte2=0xF9; ESAbsAddr16 & C { movMemToReg(C,ESAbsAddr16); }
+
+# MOV X, ES:!addr16
+:MOV X,ESAbsAddr16 is byte1=0x11; byte2=0xD9; ESAbsAddr16 & X { movMemToReg(X,ESAbsAddr16); }
+
+# XCH A, X
+:XCH A,X is byte1=0x08 & A & X { xchRegWithReg(A,X); }
+
+# XCH A, C
+:XCH A,C is byte1=0x61; byte2=0x8A & A & C { xchRegWithReg(A,C); }
+
+# XCH A, B
+:XCH A,B is byte1=0x61; byte2=0x8B & A & B { xchRegWithReg(A,B); }
+
+# XCH A, E
+:XCH A,E is byte1=0x61; byte2=0x8C & A & E { xchRegWithReg(A,E); }
+
+# XCH A, D
+:XCH A,D is byte1=0x61; byte2=0x8D & A & D { xchRegWithReg(A,D); }
+
+# XCH A, L
+:XCH A,L is byte1=0x61; byte2=0x8E & A & L { xchRegWithReg(A,L); }
+
+# XCH A, H
+:XCH A,H is byte1=0x61; byte2=0x8F & A & H { xchRegWithReg(A,H); }
+
+# XCH A, saddr
+:XCH A,ShortAddr is byte1=0x61; byte2=0xA8; ShortAddr & A { xchRegWithMem(A,ShortAddr); }
+
+# XCH A, sfr
+:XCH A,Sfr is byte1=0x61; byte2=0xAB; Sfr & A { xchRegWithMem(A,Sfr); }
+
+# XCH A, !addr16
+:XCH A,AbsAddr16 is byte1=0x61; byte2=0xAA; AbsAddr16 & A { xchRegWithMem(A,AbsAddr16); }
+
+# XCH A, [DE]
+:XCH A,AddrDE is byte1=0x61; byte2=0xAE; AddrDE & A { xchRegWithMem(A,AddrDE); }
+
+# XCH A, [DE+byte]
+:XCH A,AddrDE_byte is byte1=0x61; byte2=0xAF; AddrDE_byte & A { xchRegWithMem(A,AddrDE_byte); }
+
+# XCH A, [HL]
+:XCH A,AddrHL is byte1=0x61; byte2=0xAC; AddrHL & A { xchRegWithMem(A,AddrHL); }
+
+# XCH A, [HL+byte]
+:XCH A,AddrHL_byte is byte1=0x61; byte2=0xAD; AddrHL_byte & A { xchRegWithMem(A,AddrHL_byte); }
+
+# XCH A, [HL+B]
+:XCH A,AddrHL_B is byte1=0x61; byte2=0xB9; AddrHL_B & A { xchRegWithMem(A,AddrHL_B); }
+
+# XCH A, [HL+C]
+:XCH A,AddrHL_C is byte1=0x61; byte2=0xA9; AddrHL_C & A { xchRegWithMem(A,AddrHL_C); }
+
+# XCH A, ES:!addr16
+:XCH A,ESAbsAddr16 is byte1=0x11; byte2=0x61; byte3=0xAA; ESAbsAddr16 & A { xchRegWithMem(A,ESAbsAddr16); }
+
+# XCH A, ES: [DE]
+:XCH A,ESAddrDE is byte1=0x11; byte2=0x61; byte3=0xAE; ESAddrDE & A { xchRegWithMem(A,ESAddrDE); }
+
+# XCH A, ES: [DE+byte]
+:XCH A,ESAddrDE_byte is byte1=0x11; byte2=0x61; byte3=0xAF; ESAddrDE_byte & A { xchRegWithMem(A,ESAddrDE_byte); }
+
+# XCH A, ES: [HL]
+:XCH A,ESAddrHL is byte1=0x11; byte2=0x61; byte3=0xAC; ESAddrHL & A { xchRegWithMem(A,ESAddrHL); }
+
+# XCH A, ES: [HL+byte]
+:XCH A,ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0xAD; ESAddrHL_byte & A { xchRegWithMem(A,ESAddrHL_byte); }
+
+# XCH A, ES: [HL+B]
+:XCH A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0xB9; ESAddrHL_B & A { xchRegWithMem(A,ESAddrHL_B); }
+
+# XCH A, ES: [HL+C]
+:XCH A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xA9; ESAddrHL_C & A { xchRegWithMem(A,ESAddrHL_C); }
+
+# ONEB A
+:ONEB A is byte1=0xE1 & A { A = 1; }
+
+# ONEB X
+:ONEB X is byte1=0xE0 & X { X = 1; }
+
+# ONEB B
+:ONEB B is byte1=0xE3 & B { B = 1; }
+
+# ONEB C
+:ONEB C is byte1=0xE2 & C { C = 1; }
+
+# ONEB saddr
+:ONEB ShortAddr is byte1=0xE4; ShortAddr {}
+
+# ONEB !addr16
+:ONEB AbsAddr16 is byte1=0xE5; AbsAddr16 {}
+
+# ONEB ES:!addr16
+:ONEB ESAbsAddr16 is byte1=0x11; byte2=0xE5; ESAbsAddr16 {}
+
+# CLRB A
+:CLRB A is byte1=0xF1 & A { A = 0; }
+
+# CLRB X
+:CLRB X is byte1=0xF0 & X { X = 0; }
+
+# CLRB B
+:CLRB B is byte1=0xF3 & B { B = 0; }
+
+# CLRB C
+:CLRB C is byte1=0xF2 & C { C = 0; }
+
+# CLRB saddr
+:CLRB ShortAddr is byte1=0xF4; ShortAddr {}
+
+# CLRB !addr16
+:CLRB AbsAddr16 is byte1=0xF5; AbsAddr16 {}
+
+# CLRB ES:!addr16
+:CLRB ESAbsAddr16 is byte1=0x11; byte2=0xF5; ESAbsAddr16 {}
+
+# MOVS [HL+byte], X
+:MOVS AddrHL_byte,X is byte1=0x61; byte2=0xCE; AddrHL_byte & X {}
+
+# MOVS ES: [HL+byte], X
+:MOVS ESAddrHL_byte,X is byte1=0x11; byte2=0x61; byte3=0xCE; ESAddrHL_byte & X {}
+
+###################################
+#
+## 16-bit Data Transfer Instructions
+#
+###################################
+
+macro movRegToRegW(dst,src) {
+    dst = src;
+}
+
+macro movImmToRegW(dst,src) {
+    dst = src;
+}
+
+macro movMemToRegW(dst,src) {
+    dst = *:2 src;
+}
+
+macro movRegToMemW(dst,src) {
+    *:2 dst = src;
+}
+
+## Move word to/from stack
+
+macro movImmToMemW(dst,src) {
+    *:2 dst = src;
+}
+
+macro movMemToRegWS(dst,src) {
+    dst = *[stackarea]:2 src;
+}
+
+macro movRegToMemWS(dst,src) {
+    *[stackarea]:2 dst = src;
+}
+
+macro xchRegWithRegW(dst,src) {
+    local tmp = src;
+    src = dst;
+    dst = tmp;
+}
+
+# MOVW AX, #word
+:MOVW AX,ImmWord is byte1=0x30; ImmWord & AX { AX = ImmWord; }
+
+# MOVW BC, #word
+:MOVW BC,ImmWord is byte1=0x32; ImmWord & BC { BC = ImmWord; }
+
+# MOVW DE, #word
+:MOVW DE,ImmWord is byte1=0x34; ImmWord & DE { DE = ImmWord; }
+
+# MOVW HL, #word
+:MOVW HL,ImmWord is byte1=0x36; ImmWord & HL { HL = ImmWord; }
+
+# MOVW saddrp,#word
+:MOVW ShortAddrP,ImmWord is byte1=0xC9; ShortAddrP; ImmWord { movImmToMemW(ShortAddrP,ImmWord); }
+
+# MOVW sfrp,#word
+:MOVW SfrP,ImmWord is byte1=0xCB; SfrP; ImmWord { movImmToMemW(SfrP,ImmWord); }
+
+# MOVW AX, saddrp
+:MOVW AX,ShortAddrP is byte1=0xAD; ShortAddrP & AX { movMemToRegW(AX,ShortAddrP); }
+
+# MOVW saddrp, AX
+:MOVW ShortAddrP,AX is byte1=0xBD; ShortAddrP & AX { movRegToMemW(ShortAddrP,AX); }
+
+# MOVW AX, sfrp
+:MOVW AX,SfrP is byte1=0xAE; SfrP & AX { movMemToRegW(AX,SfrP); }
+
+# MOVW sfrp, AX
+:MOVW SfrP,AX is byte1=0xBE; SfrP & AX { movRegToMemW(SfrP,AX); }
+
+# MOVW AX, BC
+:MOVW AX,BC is byte1=0x13 & AX & BC { AX = BC; }
+
+# MOVW AX, DE
+:MOVW AX,DE is byte1=0x15 & AX & DE { AX = DE; }
+
+# MOVW AX, HL
+:MOVW AX,HL is byte1=0x17 & AX & HL { AX = HL; }
+
+# MOVW BC, AX
+:MOVW BC,AX is byte1=0x12 & BC & AX { BC = AX; }
+
+# MOVW DE, AX
+:MOVW DE,AX is byte1=0x14 & DE & AX { DE = AX; }
+
+# MOVW HL, AX
+:MOVW HL,AX is byte1=0x16 & HL & AX { HL = AX; }
+
+# MOVW AX, !addr16
+:MOVW AX,AbsAddr16 is byte1=0xAF; AbsAddr16 & AX { movMemToRegW(AX,AbsAddr16); }
+
+# MOVW !addr16, AX
+:MOVW AbsAddr16,AX is byte1=0xBF; AbsAddr16 & AX { movRegToMemW(AbsAddr16,AX); }
+
+# MOVW AX, [DE]
+:MOVW AX,AddrDE is byte1=0xA9; AddrDE & AX { movMemToRegW(AX,AddrDE); }
+
+# MOVW [DE], AX
+:MOVW AddrDE,AX is byte1=0xB9; AddrDE & AX { movRegToMemW(AddrDE,AX); }
+
+# MOVW AX, [DE+byte]
+:MOVW AX,AddrDE_byte is byte1=0xAA; AddrDE_byte & AX { movMemToRegW(AX,AddrDE_byte); }
+
+# MOVW [DE+byte], AX
+:MOVW AddrDE_byte,AX is byte1=0xBA; AddrDE_byte & AX { movRegToMemW(AddrDE_byte,AX); }
+
+# MOVW AX, [HL]
+:MOVW AX,AddrHL is byte1=0xAB; AddrHL & AX { movMemToRegW(AX,AddrHL); }
+
+# MOVW [HL], AX
+:MOVW AddrHL,AX is byte1=0xBB; AddrHL & AX { movRegToMemW(AddrHL,AX); }
+
+# MOVW AX, [HL+byte]
+:MOVW AX,AddrHL_byte is byte1=0xAC; AddrHL_byte & AX { movMemToRegW(AX,AddrHL_byte); }
+
+# MOVW [HL+byte], AX
+:MOVW AddrHL_byte,AX is byte1=0xBC; AddrHL_byte & AX { movRegToMemW(AddrHL_byte,AX); }
+
+# MOVW AX,word[B]
+:MOVW AX,AddrB_word is byte1=0x59; AddrB_word & AX { movMemToRegW(AX,AddrB_word); }
+
+# MOVW word[B], AX
+:MOVW AddrB_word,AX is byte1=0x58; AddrB_word & AX { movRegToMemW(AddrB_word,AX); }
+
+# MOVW AX,word[C]
+:MOVW AX,AddrC_word is byte1=0x69; AddrC_word & AX { movMemToReg(AX,AddrC_word); }
+
+# MOVW word[C], AX
+:MOVW AddrC_word,AX is byte1=0x68; AddrC_word & AX { movRegToMem(AddrC_word,AX); }
+
+# MOVW AX,word[BC]
+:MOVW AX,AddrBC_word is byte1=0x79; AddrBC_word & AX { movMemToReg(AX,AddrBC_word); }
+
+# MOVW word[BC], AX
+:MOVW AddrBC_word,AX is byte1=0x78; AddrBC_word & AX { movRegToMem(AddrBC_word,AX); }
+
+# MOVW AX, [SP+byte]
+:MOVW AX,AddrSP_byte is byte1=0xA8; AddrSP_byte & AX { movMemToRegWS(AX,AddrSP_byte); }
+
+# MOVW [SP+byte], AX
+:MOVW AddrSP_byte,AX is byte1=0xB8; AddrSP_byte & AX { movRegToMemWS(AddrSP_byte,AX); }
+
+# MOVW BC, saddrp
+:MOVW BC,ShortAddrP is byte1=0xDA; ShortAddrP & BC { movMemToRegW(BC,ShortAddrP); }
+
+# MOVW BC, !addr16
+#:MOVW BC,AbsAddr16 is byte1=0xDB; AbsAddr16 & BC { movMemToRegW(BC,AbsAddr16); }
+
+# MOVW DE, saddrp
+:MOVW DE,ShortAddrP is byte1=0xEA; ShortAddrP & DE { movMemToRegW(DE,ShortAddrP); }
+
+# MOVW DE, !addr16
+#:MOVW DE,AbsAddr16 is byte1=0xEB; AbsAddr16 & DE { movMemToRegW(DE,AbsAddr16); }
+
+# MOVW HL, saddrp
+:MOVW HL,ShortAddrP is byte1=0xFA; ShortAddrP & HL { movMemToRegW(HL,ShortAddrP); }
+
+# MOVW HL, !addr16
+#:MOVW HL,AbsAddr16 is byte1=0xFB; AbsAddr16 & HL { movMemToRegW(HL,AbsAddr16); }
+
+# MOVW AX, ES:!addr16
+:MOVW AX,ESAbsAddr16 is byte1=0x11; byte2=0xAF; ESAbsAddr16 & AX { movMemToRegW(AX,ESAbsAddr16); }
+
+# MOVW ES:!addr16, AX
+:MOVW ESAbsAddr16,AX is byte1=0x11; byte2=0xBF; ESAbsAddr16 & AX { movRegToMemW(ESAbsAddr16,AX); }
+
+# MOVW AX, ES:[DE]
+:MOVW AX,ESAddrDE is byte1=0x11; byte2=0xA9; ESAddrDE & AX { movMemToRegW(AX,ESAddrDE); }
+
+# MOVW ES:[DE], AX
+:MOVW ESAddrDE,AX is byte1=0x11; byte2=0xB9; ESAddrDE & AX { movRegToMemW(ESAddrDE,AX); }
+
+# MOVW AX, ES:[DE+byte]
+:MOVW AX,ESAddrDE_byte is byte1=0x11; byte2=0xAA; ESAddrDE_byte & AX { movMemToRegW(AX,ESAddrDE_byte); }
+
+# MOVW ES:[DE+byte], AX
+:MOVW ESAddrDE_byte,AX is byte1=0x11; byte2=0xBA; ESAddrDE_byte & AX { movRegToMemW(ESAddrDE_byte,AX); }
+
+# MOVW AX, ES:[HL]
+:MOVW AX,ESAddrHL is byte1=0x11; byte2=0xAB; ESAddrHL & AX { movMemToRegW(AX,ESAddrHL); }
+
+# MOVW ES:[HL], AX
+:MOVW ESAddrHL,AX is byte1=0x11; byte2=0xBB; ESAddrHL & AX { movRegToMemW(ESAddrHL,AX); }
+
+# MOVW AX, ES:[HL+byte]
+:MOVW AX,ESAddrHL_byte is byte1=0x11; byte2=0xAC; ESAddrHL_byte & AX { movMemToRegW(AX,ESAddrHL_byte); }
+
+# MOVW ES:[HL+byte], AX
+:MOVW ESAddrHL_byte,AX is byte1=0x11; byte2=0xBC; ESAddrHL_byte & AX { movRegToMemW(ESAddrHL_byte,AX); }
+
+# MOVW AX, ES:word[B]
+:MOVW AX,ESAddrB_word is byte1=0x11; byte2=0x59; ESAddrB_word & AX { movMemToRegW(AX,ESAddrB_word); }
+
+# MOVW ES:word[B], AX
+:MOVW ESAddrB_word,AX is byte1=0x11; byte2=0x58; ESAddrB_word & AX { movRegToMemW(ESAddrB_word,AX); }
+
+# MOVW AX, ES:word[C]
+:MOVW AX,ESAddrC_word is byte1=0x11; byte2=0x69; ESAddrC_word & AX { movMemToRegW(AX,ESAddrC_word); }
+
+# MOVW ES:word[C], AX
+:MOVW ESAddrC_word,AX is byte1=0x11; byte2=0x68; ESAddrC_word & AX { movRegToMemW(ESAddrC_word,AX); }
+
+# MOVW AX, ES:word[BC]
+:MOVW AX,ESAddrBC_word is byte1=0x11; byte2=0x79; ESAddrBC_word & AX { movMemToReg(AX,ESAddrBC_word); }
+
+# MOVW ES:word[BC], AX
+:MOVW ESAddrBC_word,AX is byte1=0x11; byte2=0x78; ESAddrBC_word & AX { movRegToMem(ESAddrBC_word,AX); }
+
+# MOVW BC, ES:!addr16
+:MOVW BC,ESAbsAddr16 is byte1=0x11; byte2=0xDB; ESAbsAddr16 & BC { movMemToReg(BC,ESAbsAddr16); }
+
+# MOVW DE, ES:!addr16
+:MOVW DE,ESAbsAddr16 is byte1=0x11; byte2=0xEB; ESAbsAddr16 & DE { movMemToReg(DE,ESAbsAddr16); }
+
+# MOVW HL, ES:!addr16
+:MOVW HL,ESAbsAddr16 is byte1=0x11; byte2=0xFB; ESAbsAddr16 & HL { movMemToReg(HL,ESAbsAddr16); }
+
+# XCHW AX, BC
+:XCHW AX,BC is byte1=0x33 & AX & BC { xchRegWithRegW(AX,BC); }
+
+# XCHW AX, DE
+:XCHW AX,DE is byte1=0x35 & AX & DE { xchRegWithRegW(AX,DE); }
+
+# XCHW AX, HL
+:XCHW AX,HL is byte1=0x37 & AX & HL { xchRegWithRegW(AX,HL); }
+
+# ONEW AX
+:ONEW AX is byte1=0xE6 & AX { AX = 1; }
+
+# ONEW BC
+:ONEW BC is byte1=0xE7 & BC { BC = 1; }
+
+# CLRW AX
+:CLRW AX is byte1=0xF6 & AX { AX = 0; }
+
+# CLRW BC
+:CLRW BC is byte1=0xF7 & BC { BC = 0; }
+
+###################################
+#
+## 8-bit Data Transfer Instructions
+#
+###################################
+
+# Reg = Reg + Reg
+macro addRegToReg(dst,src) {
+    dst = dst + src;
+}
+
+# Reg = Reg + Imm
+macro addImmToReg(dst,src) {
+    dst = dst + src;
+}
+
+# Reg = Reg + Mem
+macro addMemToReg(dst,src) {
+    local val = *:1 src;
+    dst = dst + val;
+}
+
+# Mem = Mem + Imm
+macro addImmToMem(dst,src) {
+    local tmp = *:1 dst;
+    local val = tmp + src;
+    *:1 dst = val;
+}
+
+# Reg = Reg - Reg
+macro subRegFromReg(dst,src) {
+    dst = dst - src;
+}
+
+# Reg = Reg - Imm
+macro subImmFromReg(dst,src) {
+    dst = dst - src;
+}
+
+# Reg = Reg - Mem
+macro subMemFromReg(dst,src) {
+    local tmp = *:1 src;
+    dst = dst - tmp;
+}
+
+# Mem = Mem - Imm
+macro subImmFromMem(dst,src) {
+    local tmp = *:1 dst;
+    local val = tmp - src;
+    *:1 dst = val;
+}
+
+# Reg = Reg & Reg
+macro andRegWithReg(dst,src) {
+    dst = dst & src;
+}
+
+# Reg = Reg & Imm
+macro andRegWithImm(dst,src) {
+    dst = dst & src;
+}
+
+# Reg = Reg & Mem
+macro andRegWithMem(dst,src) {
+    local val = *:1 src;
+    dst = dst & val;
+}
+
+# Mem = Mem & Imm
+macro andMemWithImm(dst,src) {
+    local tmp = *:1 dst;
+    local val = tmp & src;
+    *:1 dst = val;
+}
+
+# Reg = Reg | Reg
+macro orRegWithReg(dst,src) {
+    dst = dst | src;
+}
+
+# Reg = Reg | Imm
+macro orRegWithImm(dst,src) {
+    dst = dst | src;
+}
+
+# Reg = Reg | Mem
+macro orRegWithMem(dst,src) {
+    local val = *:1 src;
+    dst = dst | val;
+}
+
+# Mem = Mem | Imm
+macro orMemWithImm(dst,src) {
+    local tmp = *:1 dst;
+    local val = tmp | src;
+    *:1 dst = val;
+}
+
+# Reg = Reg ^ Reg
+macro xorRegWithReg(dst,src) {
+    dst = dst ^ src;
+}
+
+# Reg = Reg ^ Imm
+macro xorRegWithImm(dst,src) {
+    dst = dst ^ src;
+}
+
+# Reg = Reg ^ Mem
+macro xorRegWithMem(dst,src) {
+    local val = *:1 src;
+    dst = dst ^ val;
+}
+
+# Mem = Mem ^ Imm
+macro xorMemWithImm(dst,src) {
+    local tmp = *:1 dst;
+    local val = tmp ^ src;
+    *:1 dst = val;
+}
+
+# ADD A, #byte
+:ADD A,ImmByte is byte1=0x0C; ImmByte & A { A = A + ImmByte; }
+
+# ADD saddr, #byte
+:ADD ShortAddr,ImmByte is byte1=0x0A; ShortAddr; ImmByte { addImmToMem(ShortAddr,ImmByte); }
+
+# ADD A, X
+:ADD A,X is byte1=0x61; byte2=0x08 & A & X { A = A + X; }
+
+# ADD A, C
+:ADD A,C is byte1=0x61; byte2=0x0A & A & C { A = A + C; }
+
+# ADD A, B
+:ADD A,B is byte1=0x61; byte2=0x0B & A & B { A = A + B; }
+
+# ADD A, E
+:ADD A,E is byte1=0x61; byte2=0x0C & A & E { A = A + E; }
+
+# ADD A, D
+:ADD A,D is byte1=0x61; byte2=0x0D & A & D { A = A + D; }
+
+# ADD A, L
+:ADD A,L is byte1=0x61; byte2=0x0E & A & L { A = A + L; }
+
+# ADD A, H
+:ADD A,H is byte1=0x61; byte2=0x0F & A & H { A = A + H; }
+
+# ADD X, A
+:ADD X,A is byte1=0x61; byte2=0x00 & X & A { X = X + A; }
+
+# ADD A, A
+#:ADD A,A is byte1=0x61; byte2=0x01 & A & A { A = A + A; }
+
+# ADD C, A
+:ADD C,A is byte1=0x61; byte2=0x02 & C & A { C = C + A; }
+
+# ADD B, A
+:ADD B,A is byte1=0x61; byte2=0x03 & B & A { B = B + A; }
+
+# ADD E, A
+:ADD E,A is byte1=0x61; byte2=0x04 & E & A { E = E + A; }
+
+# ADD D, A
+:ADD D,A is byte1=0x61; byte2=0x05 & D & A { D = D + A; }
+
+# ADD L, A
+:ADD L,A is byte1=0x61; byte2=0x06 & L & A { L = L + A; }
+
+# ADD H, A
+:ADD H,A is byte1=0x61; byte2=0x07 & H & A { H = H + A; }
+
+# ADD A, saddr
+:ADD A,ShortAddr is byte1=0x0B; ShortAddr & A { addMemToReg(A,ShortAddr); }
+
+# ADD A, !addr16
+:ADD A,AbsAddr16 is byte1=0x0F; AbsAddr16 & A { addMemToReg(A,AbsAddr16); }
+
+# ADD A, [HL]
+:ADD A,AddrHL is byte1=0x0D; AddrHL & A { addMemToReg(A,AddrHL); }
+
+# ADD A, [HL+byte]
+:ADD A,AddrHL_byte is byte1=0x0E; AddrHL_byte & A { addMemToReg(A,AddrHL_byte); }
+
+# ADD A, [HL+B]
+:ADD A,AddrHL_B is byte1=0x61; byte2=0x80; AddrHL_B & A { addMemToReg(A,AddrHL_B); }
+
+# ADD A, [HL+C]
+:ADD A,AddrHL_C is byte1=0x61; byte2=0x82; AddrHL_C & A { addMemToReg(A,AddrHL_C); }
+
+# ADD A, ES:!addr16
+:ADD A,ESAbsAddr16 is byte1=0x11; byte2=0x0F; ESAbsAddr16 & A { addMemToReg(A,ESAbsAddr16); }
+
+# ADD A, ES:[HL]
+:ADD A,ESAddrHL is byte1=0x11; byte2=0x0D; ESAddrHL & A { addMemToReg(A,ESAddrHL); }
+
+# ADD A, ES:[HL+byte]
+:ADD A,ESAddrHL_byte is byte1=0x11; byte2=0x0E; ESAddrHL_byte & A { addMemToReg(A,ESAddrHL_byte); }
+
+# ADD A, ES:[HL+B]
+:ADD A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0x80; ESAddrHL_B & A { addMemToReg(A,ESAddrHL_B); }
+
+# ADD A, ES:[HL+C]
+:ADD A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0x82; ESAddrHL_C & A { addMemToReg(A,ESAddrHL_C); }
+
+# ADDC A, #byte
+:ADDC A,ImmByte is byte1=0x1C; ImmByte & A {}
+
+# ADDC saddr, #byte
+:ADDC ShortAddr,ImmByte is byte1=0x1A; ShortAddr; ImmByte {}
+
+# ADDC A, X
+:ADDC A,X is byte1=0x61; byte2=0x18 & A & X {}
+
+# ADDC A, C
+:ADDC A,C is byte1=0x61; byte2=0x1A & A & C {}
+
+# ADDC A, B
+:ADDC A,B is byte1=0x61; byte2=0x1B & A & B {}
+
+# ADDC A, E
+:ADDC A,E is byte1=0x61; byte2=0x1C & A & E {}
+
+# ADDC A, D
+:ADDC A,D is byte1=0x61; byte2=0x1D & A & D {}
+
+# ADDC A, L
+:ADDC A,L is byte1=0x61; byte2=0x1E & A & L {}
+
+# ADDC A, H
+:ADDC A,H is byte1=0x61; byte2=0x1F & A & H {}
+
+# ADDC X, A
+:ADDC X,A is byte1=0x61; byte2=0x10 & X & A {}
+
+# ADDC A, A
+#:ADDC A,A is byte1=0x61; byte2=0x11 & A & A {}
+
+# ADDC C, A
+:ADDC C,A is byte1=0x61; byte2=0x12 & C & A {}
+
+# ADDC B, A
+:ADDC B,A is byte1=0x61; byte2=0x13 & B & A {}
+
+# ADDC E, A
+:ADDC E,A is byte1=0x61; byte2=0x14 & E & A {}
+
+# ADDC D, A
+:ADDC D,A is byte1=0x61; byte2=0x15 & D & A {}
+
+# ADDC L, A
+:ADDC L,A is byte1=0x61; byte2=0x16 & L & A {}
+
+# ADDC H, A
+:ADDC H,A is byte1=0x61; byte2=0x17 & H & A {}
+
+# ADDC A, saddr
+:ADDC A,ShortAddr is byte1=0x1B; ShortAddr & A {}
+
+# ADDC A, !addr16
+:ADDC A,AbsAddr16 is byte1=0x1F; AbsAddr16 & A {}
+
+# ADDC A, [HL]
+:ADDC A,AddrHL is byte1=0x1D; AddrHL & A {}
+
+# ADDC A, [HL+byte]
+:ADDC A,AddrHL_byte is byte1=0x1E; AddrHL_byte & A {}
+
+# ADDC A, [HL+B]
+:ADDC A,AddrHL_B is byte1=0x61; byte2=0x90; AddrHL_B & A {}
+
+# ADDC A, [HL+C]
+:ADDC A,AddrHL_C is byte1=0x61; byte2=0x92; AddrHL_C & A {}
+
+# ADDC A, ES:!addr16
+:ADDC A,ESAbsAddr16 is byte1=0x11; byte2=0x1F; ESAbsAddr16 & A {}
+
+# ADDC A, ES:[HL]
+:ADDC A,ESAddrHL is byte1=0x11; byte2=0x1D; ESAddrHL & A {}
+
+# ADDC A, ES:[HL+byte]
+:ADDC A,ESAddrHL_byte is byte1=0x11; byte2=0x1E; ESAddrHL_byte & A {}
+
+# ADDC A, ES:[HL+B]
+:ADDC A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0x90; ESAddrHL_B & A {}
+
+# ADDC A, ES:[HL+C]
+:ADDC A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0x92; ESAddrHL_C & A {}
+
+# SUB A, #byte
+:SUB A,ImmByte is byte1=0x2C; ImmByte & A { A = A - ImmByte; }
+
+# SUB saddr, #byte
+:SUB ShortAddr,ImmByte is byte1=0x2A; ShortAddr; ImmByte { subImmFromMem(ShortAddr,ImmByte); }
+
+# SUB A, X
+:SUB A,X is byte1=0x61; byte2=0x28 & A & X { A = A - X; }
+
+# SUB A, C
+:SUB A,C is byte1=0x61; byte2=0x2A & A & C { A = A - C; }
+
+# SUB A, B
+:SUB A,B is byte1=0x61; byte2=0x2B & A & B { A = A - B; }
+
+# SUB A, E
+:SUB A,E is byte1=0x61; byte2=0x2C & A & E { A = A - B; }
+
+# SUB A, D
+:SUB A,D is byte1=0x61; byte2=0x2D & A & D { A = A - D; }
+
+# SUB A, L
+:SUB A,L is byte1=0x61; byte2=0x2E & A & L { A = A - L; }
+
+# SUB A, H
+:SUB A,H is byte1=0x61; byte2=0x2F & A & H { A = A - H; }
+
+# SUB X, A
+:SUB X,A is byte1=0x61; byte2=0x20 & X & A { X = X - A; }
+
+# SUB A, A
+#:SUB A,A is byte1=0x61; byte2=0x21 & A & A { A = A - A; }
+
+# SUB C, A
+:SUB C,A is byte1=0x61; byte2=0x22 & C & A { C = C - A; }
+
+# SUB B, A
+:SUB B,A is byte1=0x61; byte2=0x23 & B & A { B = B - A; }
+
+# SUB E, A
+:SUB E,A is byte1=0x61; byte2=0x24 & E & A { E = E - A; }
+
+# SUB D, A
+:SUB D,A is byte1=0x61; byte2=0x25 & D & A { D = D - A; }
+
+# SUB L, A
+:SUB L,A is byte1=0x61; byte2=0x26 & L & A { L = L - A; }
+
+# SUB H, A
+:SUB H,A is byte1=0x61; byte2=0x27 & H & A { H = H - A; }
+
+# SUB A, saddr
+:SUB A,ShortAddr is byte1=0x2B; ShortAddr & A { subMemFromReg(A,ShortAddr); }
+
+# SUB A, !addr16
+:SUB A,AbsAddr16 is byte1=0x2F; AbsAddr16 & A { subMemFromReg(A,AbsAddr16); }
+
+# SUB A, [HL]
+:SUB A,AddrHL is byte1=0x2D; AddrHL & A { subMemFromReg(A,AddrHL); }
+
+# SUB A, [HL+byte]
+:SUB A,AddrHL_byte is byte1=0x2E; AddrHL_byte & A { subMemFromReg(A,AddrHL_byte); }
+
+# SUB A, [HL+B]
+:SUB A,AddrHL_B is byte1=0x61; byte2=0xA0; AddrHL_B & A { subMemFromReg(A,AddrHL_B); }
+
+# SUB A, [HL+C]
+:SUB A,AddrHL_C is byte1=0x61; byte2=0xA2; AddrHL_C & A { subMemFromReg(A,AddrHL_C); }
+
+# SUB A, ES:!addr16
+:SUB A,ESAbsAddr16 is byte1=0x11; byte2=0x2F; ESAbsAddr16 & A { subMemFromReg(A,ESAbsAddr16); }
+
+# SUB A, ES:[HL]
+:SUB A,ESAddrHL is byte1=0x11; byte2=0x2D; ESAddrHL & A { subMemFromReg(A,ESAddrHL); }
+
+# SUB A, ES:[HL+byte]
+:SUB A,ESAddrHL_byte is byte1=0x11; byte2=0x2E; ESAddrHL_byte & A { subMemFromReg(A,ESAddrHL_byte); }
+
+# SUB A, ES:[HL+B]
+:SUB A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0xA0; ESAddrHL_B & A { subMemFromReg(A,ESAddrHL_B); }
+
+# SUB A, ES:[HL+C]
+:SUB A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xA2; ESAddrHL_C & A { subMemFromReg(A,ESAddrHL_C); }
+
+# SUBC A, #byte
+:SUBC A,ImmByte is byte1=0x3C; ImmByte & A {}
+
+# SUBC saddr, #byte
+:SUBC ShortAddr,ImmByte is byte1=0x3A; ShortAddr; ImmByte {}
+
+# SUBC A, X
+:SUBC A,X is byte1=0x61; byte2=0x38 & A & X {}
+
+# SUBC A, C
+:SUBC A,C is byte1=0x61; byte2=0x3A & A & C {}
+
+# SUBC A, B
+:SUBC A,B is byte1=0x61; byte2=0x3B & A & B {}
+
+# SUBC A, E
+:SUBC A,E is byte1=0x61; byte2=0x3C & A & E {}
+
+# SUBC A, D
+:SUBC A,D is byte1=0x61; byte2=0x3D & A & D {}
+
+# SUBC A, L
+:SUBC A,L is byte1=0x61; byte2=0x3E & A & L {}
+
+# SUBC A, H
+:SUBC A,H is byte1=0x61; byte2=0x3F & A & H {}
+
+# SUBC X, A
+:SUBC X,A is byte1=0x61; byte2=0x30 & X & A {}
+
+# SUBC A, A
+#:SUBC A,A is byte1=0x61; byte2=0x31 & A & A {}
+
+# SUBC C, A
+:SUBC C,A is byte1=0x61; byte2=0x32 & C & A {}
+
+# SUBC B, A
+:SUBC B,A is byte1=0x61; byte2=0x33 & B & A {}
+
+# SUBC E, A
+:SUBC E,A is byte1=0x61; byte2=0x34 & E & A {}
+
+# SUBC D, A
+:SUBC D,A is byte1=0x61; byte2=0x35 & D & A {}
+
+# SUBC L, A
+:SUBC L,A is byte1=0x61; byte2=0x36 & L & A {}
+
+# SUBC H, A
+:SUBC H,A is byte1=0x61; byte2=0x37 & H & A {}
+
+# SUBC A, saddr
+:SUBC A,ShortAddr is byte1=0x3B; ShortAddr & A {}
+
+# SUBC A, !addr16
+:SUBC A,AbsAddr16 is byte1=0x3F; AbsAddr16 & A {}
+
+# SUBC A, [HL]
+:SUBC A,AddrHL is byte1=0x3D; AddrHL & A {}
+
+# SUBC A, [HL+byte]
+:SUBC A,AddrHL_byte is byte1=0x3E; AddrHL_byte & A {}
+
+# SUBC A, [HL+B]
+:SUBC A,AddrHL_B is byte1=0x61; byte2=0xB0; AddrHL_B & A {}
+
+# SUBC A, [HL+C]
+:SUBC A,AddrHL_C is byte1=0x61; byte2=0xB2; AddrHL_C & A {}
+
+# SUBC A, ES:!addr16
+:SUBC A,ESAbsAddr16 is byte1=0x11; byte2=0x3F; ESAbsAddr16 & A {}
+
+# SUBC A, ES:[HL]
+:SUBC A,ESAddrHL is byte1=0x11; byte2=0x3D; ESAddrHL & A {}
+
+# SUBC A, ES:[HL+byte]
+:SUBC A,ESAddrHL_byte is byte1=0x11; byte2=0x3E; ESAddrHL_byte & A {}
+
+# SUBC A, ES:[HL+B]
+:SUBC A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0xB0; ESAddrHL_B & A {}
+
+# SUBC A, ES:[HL+C]
+:SUBC A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xB2; ESAddrHL_C & A {}
+
+# AND A, #byte
+:AND A,ImmByte is byte1=0x5C; ImmByte & A { A = A & ImmByte; }
+
+# AND saddr, #byte
+:AND ShortAddr,ImmByte is byte1=0x5A; ShortAddr; ImmByte { andMemWithImm(ShortAddr,ImmByte); }
+
+# AND A, X
+:AND A,X is byte1=0x61; byte2=0x58 & A & X { A = A & X; }
+
+# AND A, C
+:AND A,C is byte1=0x61; byte2=0x5A & A & C { A = A & C; }
+
+# AND A, B
+:AND A,B is byte1=0x61; byte2=0x5B & A & B { A = A & B; }
+
+# AND A, E
+:AND A,E is byte1=0x61; byte2=0x5C & A & E { A = A & E; }
+
+# AND A, D
+:AND A,D is byte1=0x61; byte2=0x5D & A & D { A = A & D; }
+
+# AND A, L
+:AND A,L is byte1=0x61; byte2=0x5E & A & L { A = A & L; }
+
+# AND A, H
+:AND A,H is byte1=0x61; byte2=0x5F & A & H { A = A & H; }
+
+# AND X, A
+:AND X,A is byte1=0x61; byte2=0x50 & X & A { X = X & A; }
+
+# AND A, A
+#:AND A,A is byte1=0x61; byte2=0x51 & A & A { A = A & A; }
+
+# AND C, A
+:AND C,A is byte1=0x61; byte2=0x52 & C & A { C = C & A; }
+
+# AND B, A
+:AND B,A is byte1=0x61; byte2=0x53 & B & A { B = B & A; }
+
+# AND E, A
+:AND E,A is byte1=0x61; byte2=0x54 & E & A { E = E & A; }
+
+# AND D, A
+:AND D,A is byte1=0x61; byte2=0x55 & D & A { D = D & A; }
+
+# AND L, A
+:AND L,A is byte1=0x61; byte2=0x56 & L & A { L = L & A; }
+
+# AND H, A
+:AND H,A is byte1=0x61; byte2=0x57 & H & A { H = H & A; }
+
+# AND A, saddr
+:AND A,ShortAddr is byte1=0x5B; ShortAddr & A { andRegWithMem(A,ShortAddr); }
+
+# AND A, !addr16
+:AND A,AbsAddr16 is byte1=0x5F; AbsAddr16 & A { andRegWithMem(A,AbsAddr16); }
+
+# AND A, [HL]
+:AND A,AddrHL is byte1=0x5D; AddrHL & A { andRegWithMem(A,AddrHL); }
+
+# AND A, [HL+byte]
+:AND A,AddrHL_byte is byte1=0x5E; AddrHL_byte & A { andRegWithMem(A,AddrHL_byte); }
+
+# AND A, [HL+B]
+:AND A,AddrHL_B is byte1=0x61; byte2=0xD0; AddrHL_B & A { andRegWithMem(A,AddrHL_B); }
+
+# AND A, [HL+C]
+:AND A,AddrHL_C is byte1=0x61; byte2=0xD2; AddrHL_C & A { andRegWithMem(A,AddrHL_C); }
+
+# AND A, ES:!addr16
+:AND A,ESAbsAddr16 is byte1=0x11; byte2=0x5F; ESAbsAddr16 & A { andRegWithMem(A,ESAbsAddr16); }
+
+# AND A, ES:[HL]
+:AND A,ESAddrHL is byte1=0x11; byte2=0x5D; ESAddrHL & A { andRegWithMem(A,ESAddrHL); }
+
+# AND A, ES:[HL+byte]
+:AND A,ESAddrHL_byte is byte1=0x11; byte2=0x5E; ESAddrHL_byte & A { andRegWithMem(A,ESAddrHL_byte); }
+
+# AND A, ES:[HL+B]
+:AND A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0xD0; ESAddrHL_B & A { andRegWithMem(A,ESAddrHL_B); }
+
+# AND A, ES:[HL+C]
+:AND A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xD2; ESAddrHL_C & A { andRegWithMem(A,ESAddrHL_C); }
+
+# OR A, #byte
+:OR A,ImmByte is byte1=0x6C; ImmByte & A { A = A | ImmByte; }
+
+# OR saddr, #byte
+:OR ShortAddr,ImmByte is byte1=0x6A; ShortAddr; ImmByte { orMemWithImm(ShortAddr,ImmByte); }
+
+# OR A, X
+:OR A,X is byte1=0x61; byte2=0x68 & A & X { A = A | X; }
+
+# OR A, C
+:OR A,C is byte1=0x61; byte2=0x6A & A & C { A = A | C; }
+
+# OR A, B
+:OR A,B is byte1=0x61; byte2=0x6B & A & B { A = A | B; }
+
+# OR A, E
+:OR A,E is byte1=0x61; byte2=0x6C & A & E { A = A | E; }
+
+# OR A, D
+:OR A,D is byte1=0x61; byte2=0x6D & A & D { A = A | D; }
+
+# OR A, L
+:OR A,L is byte1=0x61; byte2=0x6E & A & L { A = A | L; }
+
+# OR A, H
+:OR A,H is byte1=0x61; byte2=0x6F & A & H { A = A | H; }
+
+# OR X, A
+:OR X,A is byte1=0x61; byte2=0x60 & X & A { X = X | A; }
+
+# OR A, A
+#:OR A,A is byte1=0x61; byte2=0x61 & A & A { A = A | A; }
+
+# OR C, A
+:OR C,A is byte1=0x61; byte2=0x62 & C & A { C = C | A; }
+
+# OR B, A
+:OR B,A is byte1=0x61; byte2=0x63 & B & A { B = B | A; }
+
+# OR E, A
+:OR E,A is byte1=0x61; byte2=0x64 & E & A { E = E | A; }
+
+# OR D, A
+:OR D,A is byte1=0x61; byte2=0x65 & D & A { D = D | A; }
+
+# OR L, A
+:OR L,A is byte1=0x61; byte2=0x66 & L & A { L = L | A; }
+
+# OR H, A
+:OR H,A is byte1=0x61; byte2=0x67 & H & A { H = H | A; }
+
+# OR A, saddr
+:OR A,ShortAddr is byte1=0x6B; ShortAddr & A { orRegWithMem(A,ShortAddr); }
+
+# OR A, !addr16
+:OR A,AbsAddr16 is byte1=0x6F; AbsAddr16 & A { orRegWithMem(A,AbsAddr16); }
+
+# OR A, [HL]
+:OR A,AddrHL is byte1=0x6D; AddrHL & A { orRegWithMem(A,AddrHL); }
+
+# OR A, [HL+byte]
+:OR A,AddrHL_byte is byte1=0x6E; AddrHL_byte & A { orRegWithMem(A,AddrHL_byte); }
+
+# OR A, [HL+B]
+:OR A,AddrHL_B is byte1=0x61; byte2=0xE0; AddrHL_B & A { orRegWithMem(A,AddrHL_B); }
+
+# OR A, [HL+C]
+:OR A,AddrHL_C is byte1=0x61; byte2=0xE2; AddrHL_C & A { orRegWithMem(A,AddrHL_C); }
+
+# OR A, ES:!addr16
+:OR A,ESAbsAddr16 is byte1=0x11; byte2=0x6F; ESAbsAddr16 & A { orRegWithMem(A,ESAbsAddr16); }
+
+# OR A, ES:[HL]
+:OR A,ESAddrHL is byte1=0x11; byte2=0x6D; ESAddrHL & A { orRegWithMem(A,ESAddrHL); }
+
+# OR A, ES:[HL+byte]
+:OR A,ESAddrHL_byte is byte1=0x11; byte2=0x6E; ESAddrHL_byte & A { orRegWithMem(A,ESAddrHL_byte); }
+
+# OR A, ES:[HL+B]
+:OR A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0xE0; ESAddrHL_B & A { orRegWithMem(A,ESAddrHL_B); }
+
+# OR A, ES:[HL+C]
+:OR A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xE2; ESAddrHL_C & A { orRegWithMem(A,ESAddrHL_C); }
+
+# XOR A, #byte
+:XOR A,ImmByte is byte1=0x7C; ImmByte & A { A = A ^ ImmByte; }
+
+# XOR saddr, #byte
+:XOR ShortAddr,ImmByte is byte1=0x7A; ShortAddr; ImmByte {}
+
+# XOR A, X
+:XOR A,X is byte1=0x61; byte2=0x78 & A & X { A = A ^ X; }
+
+# XOR A, C
+:XOR A,C is byte1=0x61; byte2=0x7A & A & C { A = A ^ C; }
+
+# XOR A, B
+:XOR A,B is byte1=0x61; byte2=0x7B & A & B { A = A ^ B; }
+
+# XOR A, E
+:XOR A,E is byte1=0x61; byte2=0x7C & A & E { A = A ^ E; }
+
+# XOR A, D
+:XOR A,D is byte1=0x61; byte2=0x7D & A & D { A = A ^ D; }
+
+# XOR A, L
+:XOR A,L is byte1=0x61; byte2=0x7E & A & L { A = A ^ L; }
+
+# XOR A, H
+:XOR A,H is byte1=0x61; byte2=0x7F & A & H { A = A ^ H; }
+
+# XOR X, A
+:XOR X,A is byte1=0x61; byte2=0x70 & X & A { X = X ^ A; }
+
+# XOR A, A
+#:XOR A,A is byte1=0x61; byte2=0x71 & A & A { A = A ^ A; }
+
+# XOR C, A
+:XOR C,A is byte1=0x61; byte2=0x72 & C & A { C = C ^ A; }
+
+# XOR B, A
+:XOR B,A is byte1=0x61; byte2=0x73 & B & A { B = B ^ A; }
+
+# XOR E, A
+:XOR E,A is byte1=0x61; byte2=0x74 & E & A { E = E ^ A; }
+
+# XOR D, A
+:XOR D,A is byte1=0x61; byte2=0x75 & D & A { D = D ^ A; }
+
+# XOR L, A
+:XOR L,A is byte1=0x61; byte2=0x76 & L & A { L = L ^ A; }
+
+# XOR H, A
+:XOR H,A is byte1=0x61; byte2=0x77 & H & A { H = H ^ A; }
+
+# XOR A, saddr
+:XOR A,ShortAddr is byte1=0x7B; ShortAddr & A { xorRegWithMem(A,ShortAddr); }
+
+# XOR A, !addr16
+:XOR A,AbsAddr16 is byte1=0x7F; AbsAddr16 & A { xorRegWithMem(A,AbsAddr16); }
+
+# XOR A, [HL]
+:XOR A,AddrHL is byte1=0x7D; AddrHL & A { xorRegWithMem(A,AddrHL); }
+
+# XOR A, [HL+byte]
+:XOR A,AddrHL_byte is byte1=0x7E; AddrHL_byte & A { xorRegWithMem(A,AddrHL_byte); }
+
+# XOR A, [HL+B]
+:XOR A,AddrHL_B is byte1=0x61; byte2=0xF0; AddrHL_B & A { xorRegWithMem(A,AddrHL_B); }
+
+# XOR A, [HL+C]
+:XOR A,AddrHL_C is byte1=0x61; byte2=0xF2; AddrHL_C & A { xorRegWithMem(A,AddrHL_C); }
+
+# XOR A, ES:!addr16
+:XOR A,ESAbsAddr16 is byte1=0x11; byte2=0x7F; ESAbsAddr16 & A { xorRegWithMem(A,ESAbsAddr16); }
+
+# XOR A, ES:[HL]
+:XOR A,ESAddrHL is byte1=0x11; byte2=0x7D; ESAddrHL & A { xorRegWithMem(A,ESAddrHL); }
+
+# XOR A, ES:[HL+byte]
+:XOR A,ESAddrHL_byte is byte1=0x11; byte2=0x7E; ESAddrHL_byte & A { xorRegWithMem(A,ESAddrHL_byte); }
+
+# XOR A, ES:[HL+B]
+:XOR A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0xF0; ESAddrHL_B & A { xorRegWithMem(A,ESAddrHL_B); }
+
+# XOR A, ES:[HL+C]
+:XOR A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xF2; ESAddrHL_C & A { xorRegWithMem(A,ESAddrHL_C); }
+
+macro compareRegWithReg(dst, src) {
+  Z = (src - dst) == 0;
+  CY = (src & 0x7f) < (dst & 0x7f);
+  AC = (src & 0x07) < (dst & 0x07);
+}
+
+macro compareRegWithImm(dst, src) {
+  Z = (src - dst) == 0;
+  CY = (src & 0x7f) < (dst & 0x7f);
+  AC = (src & 0x07) < (dst & 0x07);
+}
+
+macro compareRegWithMem(dst,src) {
+    local val = *:1 src;
+    Z = (val - dst) == 0;
+    CY = (val & 0x7f) < (dst & 0x7f);
+    AC = (val & 0x07) < (dst & 0x07);
+}
+
+macro compareMemWithImm(dst,src) {
+    local val = *:1 dst;
+    Z = (src - val) == 0;
+    CY = (src & 0x7f) < (val & 0x7f);
+    AC = (src & 0x07) < (val & 0x07);
+}
+
+# CMP A, #byte
+:CMP A,ImmByte is byte1=0x4C; ImmByte & A { compareRegWithImm(A,ImmByte); }
+
+# CMP saddr, #byte
+:CMP ShortAddr,ImmByte is byte1=0x4A; ShortAddr; ImmByte { compareMemWithImm(ShortAddr,ImmByte); }
+
+# CMP A, X
+:CMP A,X is byte1=0x61; byte2=0x48 & A & X { compareRegWithReg(A,X); }
+
+# CMP A, C
+:CMP A,C is byte1=0x61; byte2=0x4A & A & C { compareRegWithReg(A,C); }
+
+# CMP A, B
+:CMP A,B is byte1=0x61; byte2=0x4B & A & B { compareRegWithReg(A,B); }
+
+# CMP A, E
+:CMP A,E is byte1=0x61; byte2=0x4C & A & E { compareRegWithReg(A,E); }
+
+# CMP A, D
+:CMP A,D is byte1=0x61; byte2=0x4D & A & D { compareRegWithReg(A,D); }
+
+# CMP A, L
+:CMP A,L is byte1=0x61; byte2=0x4E & A & L { compareRegWithReg(A,L); }
+
+# CMP A, H
+:CMP A,H is byte1=0x61; byte2=0x4F & A & H { compareRegWithReg(A,H); }
+
+# CMP X, A
+:CMP X,A is byte1=0x61; byte2=0x40 & X & A { compareRegWithReg(X,A); }
+
+# CMP A, A
+#:CMP A,A is byte1=0x61; byte2=0x41 & A & A { compareRegWithReg(A,A); }
+
+# CMP C, A
+:CMP C,A is byte1=0x61; byte2=0x42 & C & A { compareRegWithReg(C,A); }
+
+# CMP B, A
+:CMP B,A is byte1=0x61; byte2=0x43 & B & A { compareRegWithReg(B,A); }
+
+# CMP E, A
+:CMP E,A is byte1=0x61; byte2=0x44 & E & A { compareRegWithReg(E,A); }
+
+# CMP D, A
+:CMP D,A is byte1=0x61; byte2=0x45 & D & A { compareRegWithReg(D,A); }
+
+# CMP L, A
+:CMP L,A is byte1=0x61; byte2=0x46 & L & A { compareRegWithReg(L,A); }
+
+# CMP H, A
+:CMP H,A is byte1=0x61; byte2=0x47 & H & A { compareRegWithReg(H,A); }
+
+# CMP A, saddr
+:CMP A,ShortAddr is byte1=0x4B; ShortAddr & A { compareRegWithMem(A,ShortAddr); }
+
+# CMP A, !addr16
+:CMP A,AbsAddr16 is byte1=0x4F; AbsAddr16 & A { compareRegWithMem(A,AbsAddr16); }
+
+# CMP A, [HL]
+:CMP A,AddrHL is byte1=0x4D; AddrHL & A { compareRegWithMem(A,AddrHL); }
+
+# CMP A, [HL+byte]
+:CMP A,AddrHL_byte is byte1=0x4E; AddrHL_byte & A { compareRegWithMem(A,AddrHL_byte); }
+
+# CMP A, [HL+B]
+:CMP A,AddrHL_B is byte1=0x61; byte2=0xC0; AddrHL_B & A { compareRegWithMem(A,AddrHL_B); }
+
+# CMP A, [HL+C]
+:CMP A,AddrHL_C is byte1=0x61; byte2=0xC2; AddrHL_C & A { compareRegWithMem(A,AddrHL_C); }
+
+# CMP !addr16, #byte
+:CMP AbsAddr16,ImmByte is byte1=0x40; AbsAddr16; ImmByte { compareMemWithImm(AbsAddr16,ImmByte); }
+
+# CMP A, ES:!addr16
+:CMP A,ESAbsAddr16 is byte1=0x11; byte2=0x4F; ESAbsAddr16 & A { compareRegWithMem(A,ESAbsAddr16); }
+
+# CMP A, ES:[HL]
+:CMP A,ESAddrHL is byte1=0x11; byte2=0x4D; ESAddrHL & A { compareRegWithMem(A,ESAddrHL); }
+
+# CMP A, ES:[HL+byte]
+:CMP A,ESAddrHL_byte is byte1=0x11; byte2=0x4E; ESAddrHL_byte & A { compareRegWithMem(A,ESAddrHL_byte); }
+
+# CMP A, ES:[HL+B]
+:CMP A,ESAddrHL_B is byte1=0x11; byte2=0x61; byte3=0xC0; ESAddrHL_B & A { compareRegWithMem(A,ESAddrHL_B); }
+
+# CMP A, ES:[HL+C]
+:CMP A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xC2; ESAddrHL_C & A { compareRegWithMem(A,ESAddrHL_C); }
+
+# CMP ES:!addr16, #byte
+:CMP ESAbsAddr16,ImmByte is byte1=0x11; byte2=0x40; ESAbsAddr16; ImmByte { compareMemWithImm(ESAbsAddr16,ImmByte); }
+
+macro compareRegWithZero(dst) {
+  Z = (dst - 0) == 0;
+  CY = 0;
+  AC = 0;
+}
+
+# CMP0 A
+:CMP0 A is byte1=0xD1 & A { compareRegWithZero(A); }
+
+# CMP0 X
+:CMP0 X is byte1=0xD0 & X { compareRegWithZero(X); }
+
+# CMP0 B
+:CMP0 B is byte1=0xD3 & B { compareRegWithZero(B); }
+
+# CMP0 C
+:CMP0 C is byte1=0xD2 & C { compareRegWithZero(C); }
+
+# CMP0 saddr
+:CMP0 ShortAddr is byte1=0xD4; ShortAddr { compareRegWithZero(ShortAddr); }
+
+# CMP0 !addr16
+:CMP0 AbsAddr16 is byte1=0xD5; AbsAddr16 {}
+
+# CMP0 ES:!addr16
+:CMP0 ESAbsAddr16 is byte1=0x11; byte2=0xD5; ESAbsAddr16 {}
+
+# CMPS X, [HL+byte]
+:CMPS X,AddrHL_byte is byte1=0x61; byte2=0xDE; AddrHL_byte & X {}
+
+# CMPS X, ES:[HL+byte]
+:CMPS X,ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0xDE; ESAddrHL_byte & X {}
+
+###################################
+#
+## 16-bit Operation Instructions
+#
+###################################
+
+macro setflags(res) {
+    Z = res == 0;
+}
+
+## Addition macros
+
+# Reg = Reg + Reg
+macro addRegToRegW(dst,src) {
+    CY = carry(dst,src);
+    dst = dst + src;
+    setflags(dst);
+}
+
+# Reg = Reg + Imm
+macro addImmToRegW(dst,src) {
+    CY = carry(dst,src);
+    dst = dst + src;
+    setflags(dst);
+}
+
+# Reg = Reg + Mem
+macro addMemToRegW(dst,src) {
+    local tmp = *:2 src;
+    CY = carry(dst,tmp);
+    dst = dst + tmp;
+    setflags(dst);
+}
+
+# Mem = Mem + Imm
+macro addImmToMemW(dst,src) {
+    local tmp = *:2 dst;
+    CY = carry(tmp,src);
+    local val = tmp + src;
+    *:2 dst = val;
+    setflags(val);
+}
+
+## Subtraction macros
+
+# Reg = Reg - Reg
+macro subRegFromRegW(dst,src) {
+    dst = dst - src;
+}
+
+# Reg = Reg - Imm
+macro subImmFromRegW(dst,src) {
+    dst = dst - src;
+}
+
+# Reg = Reg - Mem
+macro subMemFromRegW(dst,src) {
+    local tmp = *:2 src;
+    dst = dst - tmp;
+}
+
+# Mem = Mem - Imm
+macro subImmFromMemW(dst,src) {
+    local tmp = *:2 dst;
+    local val = tmp - src;
+    *:2 dst = val;
+}
+
+## Compare macros
+
+macro compareRegWithImmW(dst,src) {
+    Z = (src - dst) == 0;
+    CY = (src & 0x7fff) < (dst & 0x7fff);
+}
+
+macro compareRegWithRegW(dst,src) {
+    Z = (src - dst) == 0;
+    CY = (src & 0x7fff) < (dst & 0x7fff);
+}
+
+macro compareRegWithMemW(dst,src) {
+    local val = *:2 src;
+    Z = (val - dst) == 0;
+    CY = (val & 0x7fff) < (dst & 0x7fff);
+}
+
+# ADDW AX, #word
+:ADDW AX,ImmWord is byte1=0x04; ImmWord & AX { AX = AX + ImmWord; }
+
+# ADDW AX, AX
+:ADDW AX,"AX" is byte1=0x01 & AX { AX = AX + AX; }
+
+# ADDW AX, BC
+:ADDW AX,BC is byte1=0x03 & AX & BC { AX = AX + BC; }
+
+# ADDW AX, DE
+:ADDW AX,DE is byte1=0x05 & AX & DE { AX = AX + DE; }
+
+# ADDW AX, HL
+:ADDW AX,HL is byte1=0x07 & AX & HL { AX = AX + HL; }
+
+# ADDW AX, saddrp
+:ADDW AX,ShortAddrP is byte1=0x06; ShortAddrP & AX { addMemToRegW(AX,ShortAddrP); }
+
+# ADDW AX, !addr16
+:ADDW AX,AbsAddr16 is byte1=0x02; AbsAddr16 & AX { addMemToRegW(AX,AbsAddr16); }
+
+# ADDW AX, [HL+byte]
+:ADDW AX,AddrHL_byte is byte1=0x61; byte2=0x09; AddrHL_byte & AX {}
+
+# ADDW AX, ES:!addr16
+:ADDW AX,ESAbsAddr16 is byte1=0x11; byte2=0x02; ESAbsAddr16 & AX {}
+
+# ADDW AX, ES:[HL+byte]
+:ADDW AX,ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0x09; ESAddrHL_byte & AX {}
+
+# SUBW AX, #word
+:SUBW AX,ImmWord is byte1=0x24; ImmWord & AX { AX = AX - ImmWord; }
+
+# SUBW AX, BC
+:SUBW AX,BC is byte1=0x23 & AX & BC { AX = AX - BC; }
+
+# SUBW AX, DE
+:SUBW AX,DE is byte1=0x25 & AX & DE { AX = AX - DE; }
+
+# SUBW AX, HL
+:SUBW AX,HL is byte1=0x27 & AX & HL { AX = AX - HL; }
+
+# SUBW AX, saddrp
+:SUBW AX,ShortAddrP is byte1=0x26; ShortAddrP & AX { subMemFromRegW(AX,ShortAddrP); }
+
+# SUBW AX, !addr16
+:SUBW AX,AbsAddr16 is byte1=0x22; AbsAddr16 & AX { subMemFromRegW(AX,AbsAddr16); }
+
+# SUBW AX, [HL+byte]
+:SUBW AX,AddrHL_byte is byte1=0x61; byte2=0x29; AddrHL_byte & AX { subMemFromRegW(AX,AddrHL_byte); }
+
+# SUBW AX, ES:!addr16
+:SUBW AX,ESAbsAddr16 is byte1=0x11; byte2=0x22; ESAbsAddr16 & AX { subMemFromRegW(AX,ESAbsAddr16); }
+
+# SUBW AX, ES:[HL+byte]
+:SUBW AX,ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0x29; ESAddrHL_byte & AX { subMemFromRegW(AX,ESAddrHL_byte); }
+
+# CMPW AX, #word
+:CMPW AX,ImmWord is byte1=0x44; ImmWord & AX { compareRegWithImmW(AX,ImmWord); }
+
+# CMPW AX, BC
+:CMPW AX,BC is byte1=0x43 & AX & BC { compareRegWithRegW(AX,BC); }
+
+# CMPW AX, DE
+:CMPW AX,DE is byte1=0x45 & AX & DE { compareRegWithRegW(AX,DE); }
+
+# CMPW AX, HL
+:CMPW AX,HL is byte1=0x47 & AX & HL { compareRegWithRegW(AX,HL); }
+
+# CMPW AX, saddrp
+:CMPW AX,ShortAddrP is byte1=0x46; ShortAddrP & AX { compareRegWithMemW(AX,ShortAddrP); }
+
+# CMPW AX, !addr16
+:CMPW AX,AbsAddr16 is byte1=0x42; AbsAddr16 & AX { compareRegWithMemW(AX,AbsAddr16); }
+
+# CMPW AX, [HL+byte]
+:CMPW AX,AddrHL_byte is byte1=0x61; byte2=0x49; AddrHL_byte & AX { compareRegWithMemW(AX,AddrHL_byte); }
+
+# CMPW AX, ES:!addr16
+:CMPW AX,ESAbsAddr16 is byte1=0x11; byte2=0x42; ESAbsAddr16 & AX { compareRegWithMemW(AX,ESAbsAddr16); }
+
+# CMPW AX, ES:[HL+byte]
+:CMPW AX,ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0x49; ESAddrHL_byte & AX { compareRegWithMemW(AX,ESAddrHL_byte); }
+
+###################################
+#
+## Increment/Decrement Instructions
+#
+###################################
+
+macro incReg(dst) {
+    dst = dst + 1;
+    Z = dst == 0;
+}
+
+macro incMem(dst) {
+    local res = *:1 dst + 1;
+    *:1 dst = res;
+    Z = res == 0;
+}
+
+macro decReg(dst) {
+    dst = dst - 1;
+    Z = dst == 0;
+}
+
+macro decMem(dst) {
+    local res = *:1 dst - 1;
+    *:1 dst = res;
+    Z = res == 0;
+}
+
+macro incRegW(dst) {
+    dst = dst + 1;
+    Z = dst == 0;
+}
+
+macro incMemW(dst) {
+    local res = *:2 dst + 1;
+    *:2 dst = res;
+    Z = res == 0;
+}
+
+macro decRegW(dst) {
+    dst = dst - 1;
+    Z = dst == 0;
+}
+
+macro decMemW(dst) {
+    local res = *:2 dst + 1;
+    *:2 dst = res;
+    Z = res == 0;
+}
+
+# INC X
+:INC X is byte1=0x80 & X { incReg(X); }
+
+# INC A
+:INC A is byte1=0x81 & A { incReg(A); }
+
+# INC C
+:INC C is byte1=0x82 & C { incReg(C); }
+
+# INC B
+:INC B is byte1=0x83 & B { incReg(B); }
+
+# INC E
+:INC E is byte1=0x84 & E { incReg(E); }
+
+# INC D
+:INC D is byte1=0x85 & D { incReg(D); }
+
+# INC L
+:INC L is byte1=0x86 & L { incReg(L); }
+
+# INC H
+:INC H is byte1=0x87 & H { incReg(H); }
+
+# INC saddr
+:INC ShortAddr is byte1=0xA4; ShortAddr { incMem(ShortAddr); }
+
+# INC !addr16
+:INC AbsAddr16 is byte1=0xA0; AbsAddr16 { incMem(AbsAddr16); }
+
+# INC [HL+byte]
+:INC AddrHL_byte is byte1=0x61; byte2=0x59; AddrHL_byte { incMem(AddrHL_byte); }
+
+# INC ES:!addr16
+:INC ESAbsAddr16 is byte1=0x11; byte2=0xA0; ESAbsAddr16 { incMem(ESAbsAddr16); }
+
+# INC ES:[HL+byte]
+:INC ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0x59; ESAddrHL_byte { incMem(ESAddrHL_byte); }
+
+# DEC X
+:DEC X is byte1=0x90 & X { decReg(X); }
+
+# DEC A
+:DEC A is byte1=0x91 & A { decReg(A); }
+
+# DEC C
+:DEC C is byte1=0x92 & C { decReg(C); }
+
+# DEC B
+:DEC B is byte1=0x93 & B { decReg(B); }
+
+# DEC E
+:DEC E is byte1=0x94 & E { decReg(E); }
+
+# DEC D
+:DEC D is byte1=0x95 & D { decReg(D); }
+
+# DEC L
+:DEC L is byte1=0x96 & L { decReg(L); }
+
+# DEC H
+:DEC H is byte1=0x97 & H { decReg(H); }
+
+# DEC saddr
+:DEC ShortAddr is byte1=0xB4; ShortAddr { decMem(ShortAddr); }
+
+# DEC !addr16
+:DEC AbsAddr16 is byte1=0xB0; AbsAddr16 { decMem(AbsAddr16); }
+
+# DEC [HL+byte]
+:DEC AddrHL_byte is byte1=0x61; byte2=0x69; AddrHL_byte { decMem(AddrHL_byte); }
+
+# DEC ES:!addr16
+:DEC ESAbsAddr16 is byte1=0x11; byte2=0xB0; ESAbsAddr16 { decMem(ESAbsAddr16); }
+
+# DEC ES:[HL+byte]
+:DEC ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0x69; ESAddrHL_byte { decMem(ESAddrHL_byte); }
+
+# INCW AX
+:INCW AX is byte1=0xA1 & AX { incRegW(AX); }
+
+# INCW BC
+:INCW BC is byte1=0xA3 & BC { incRegW(BC); }
+
+# INCW DE
+:INCW DE is byte1=0xA5 & DE { incRegW(DE); }
+
+# INCW HL
+:INCW HL is byte1=0xA7 & HL { incRegW(HL); }
+
+# INCW saddrp
+:INCW ShortAddrP is byte1=0xA6; ShortAddrP { incMemW(ShortAddrP); }
+
+# INCW !addr16
+:INCW AbsAddr16 is byte1=0xA2; AbsAddr16 { incMemW(AbsAddr16); }
+
+# INCW [HL+byte]
+:INCW AddrHL_byte is byte1=0x61; byte2=0x79; AddrHL_byte { incMemW(AddrHL_byte); }
+
+# INCW ES:!addr16
+:INCW ESAbsAddr16 is byte1=0x11; byte2=0xA2; ESAbsAddr16 { incMemW(ESAbsAddr16); }
+
+# INCW ES:[HL+byte]
+:INCW ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0x79; ESAddrHL_byte { incMemW(ESAddrHL_byte); }
+
+# DECW AX
+:DECW AX is byte1=0xB1 & AX { decRegW(AX); }
+
+# DECW BC
+:DECW BC is byte1=0xB3 & BC { decRegW(BC); }
+
+# DECW DE
+:DECW DE is byte1=0xB5 & DE { decRegW(DE); }
+
+# DECW HL
+:DECW HL is byte1=0xB7 & HL { decRegW(HL); }
+
+# DECW saddrp
+:DECW ShortAddrP is byte1=0xB6; ShortAddrP { decMemW(ShortAddrP); }
+
+# DECW !addr16
+:DECW AbsAddr16 is byte1=0xB2; AbsAddr16 { decMemW(AbsAddr16); }
+
+# DECW [HL+byte]
+:DECW AddrHL_byte is byte1=0x61; byte2=0x89; AddrHL_byte { decMemW(AddrHL_byte); }
+
+# DECW ES:!addr16
+:DECW ESAbsAddr16 is byte1=0x11; byte2=0xB2; ESAbsAddr16 { decMemW(ESAbsAddr16); }
+
+# DECW ES:[HL+byte]
+:DECW ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0x89; ESAddrHL_byte { decMemW(ESAddrHL_byte); }
+
+###################################
+#
+## Shift Instructions
+#
+###################################
+
+# SHR A, 1
+:SHR A,1 is byte1=0x31; byte2=0x1A & A { A = A >> 1; }
+
+# SHR A, 2
+:SHR A,2 is byte1=0x31; byte2=0x2A & A { A = A >> 2; }
+
+# SHR A, 3
+:SHR A,3 is byte1=0x31; byte2=0x3A & A { A = A >> 3; }
+
+# SHR A, 4
+:SHR A,4 is byte1=0x31; byte2=0x4A & A { A = A >> 4; }
+
+# SHR A, 5
+:SHR A,5 is byte1=0x31; byte2=0x5A & A { A = A >> 5; }
+
+# SHR A, 6
+:SHR A,6 is byte1=0x31; byte2=0x6A & A { A = A >> 6; }
+
+# SHR A, 7
+:SHR A,7 is byte1=0x31; byte2=0x7A & A { A = A >> 7; }
+
+# SHRW AX, 1
+:SHRW AX,1 is byte1=0x31; byte2=0x1E & AX { AX = AX >> 1; }
+
+# SHRW AX, 2
+:SHRW AX,2 is byte1=0x31; byte2=0x2E & AX { AX = AX >> 2; }
+
+# SHRW AX, 3
+:SHRW AX,3 is byte1=0x31; byte2=0x3E & AX { AX = AX >> 3; }
+
+# SHRW AX, 4
+:SHRW AX,4 is byte1=0x31; byte2=0x4E & AX { AX = AX >> 4; }
+
+# SHRW AX, 5
+:SHRW AX,5 is byte1=0x31; byte2=0x5E & AX { AX = AX >> 5; }
+
+# SHRW AX, 6
+:SHRW AX,6 is byte1=0x31; byte2=0x6E & AX { AX = AX >> 6; }
+
+# SHRW AX, 7
+:SHRW AX,7 is byte1=0x31; byte2=0x7E & AX { AX = AX >> 7; }
+
+# SHRW AX, 8
+:SHRW AX,8 is byte1=0x31; byte2=0x8E & AX { AX = AX >> 8; }
+
+# SHRW AX, 9
+:SHRW AX,9 is byte1=0x31; byte2=0x9E & AX { AX = AX >> 9; }
+
+# SHRW AX, 10
+:SHRW AX,10 is byte1=0x31; byte2=0xAE & AX { AX = AX >> 10; }
+
+# SHRW AX, 11
+:SHRW AX,11 is byte1=0x31; byte2=0xBE & AX { AX = AX >> 11; }
+
+# SHRW AX, 12
+:SHRW AX,12 is byte1=0x31; byte2=0xCE & AX { AX = AX >> 12; }
+
+# SHRW AX, 13
+:SHRW AX,13 is byte1=0x31; byte2=0xDE & AX { AX = AX >> 13; }
+
+# SHRW AX, 14
+:SHRW AX,14 is byte1=0x31; byte2=0xEE & AX { AX = AX >> 14; }
+
+# SHRW AX, 15
+:SHRW AX,15 is byte1=0x31; byte2=0xFE & AX { AX = AX >> 15; }
+
+# SHL A, 1
+:SHL A,1 is byte1=0x31; byte2=0x19 & A { A = A << 1; }
+
+# SHL A, 2
+:SHL A,2 is byte1=0x31; byte2=0x29 & A { A = A << 2; }
+
+# SHL A, 3
+:SHL A,3 is byte1=0x31; byte2=0x39 & A { A = A << 3; }
+
+# SHL A, 4
+:SHL A,4 is byte1=0x31; byte2=0x49 & A { A = A << 4; }
+
+# SHL A, 5
+:SHL A,5 is byte1=0x31; byte2=0x59 & A { A = A << 5; }
+
+# SHL A, 6
+:SHL A,6 is byte1=0x31; byte2=0x69 & A { A = A << 6; }
+
+# SHL A, 7
+:SHL A,7 is byte1=0x31; byte2=0x79 & A { A = A << 7; }
+
+# SHL B, 1
+:SHL B,1 is byte1=0x31; byte2=0x18 & B { B = B << 1; }
+
+# SHL B, 2
+:SHL B,2 is byte1=0x31; byte2=0x28 & B { B = B << 2; }
+
+# SHL B, 3
+:SHL B,3 is byte1=0x31; byte2=0x38 & B { B = B << 3; }
+
+# SHL B, 4
+:SHL B,4 is byte1=0x31; byte2=0x48 & B { B = B << 4; }
+
+# SHL B, 5
+:SHL B,5 is byte1=0x31; byte2=0x58 & B { B = B << 5; }
+
+# SHL B, 6
+:SHL B,6 is byte1=0x31; byte2=0x68 & B { B = B << 6; }
+
+# SHL B, 7
+:SHL B,7 is byte1=0x31; byte2=0x78 & B { B = B << 7; }
+
+# SHL C, 1
+:SHL C,1 is byte1=0x31; byte2=0x17 & C { C = C << 1; }
+
+# SHL C, 2
+:SHL C,2 is byte1=0x31; byte2=0x27 & C { C = C << 2; }
+
+# SHL C, 3
+:SHL C,3 is byte1=0x31; byte2=0x37 & C { C = C << 3; }
+
+# SHL C, 4
+:SHL C,4 is byte1=0x31; byte2=0x47 & C { C = C << 4; }
+
+# SHL C, 5
+:SHL C,5 is byte1=0x31; byte2=0x57 & C { C = C << 5; }
+
+# SHL C, 6
+:SHL C,6 is byte1=0x31; byte2=0x67 & C { C = C << 6; }
+
+# SHL C, 7
+:SHL C,7 is byte1=0x31; byte2=0x77 & C { C = C << 7; }
+
+# SHLW AX, 1
+:SHLW AX,1 is byte1=0x31; byte2=0x1D & AX { AX = AX << 1; }
+
+# SHLW AX, 2
+:SHLW AX,2 is byte1=0x31; byte2=0x2D & AX { AX = AX << 2; }
+
+# SHLW AX, 3
+:SHLW AX,3 is byte1=0x31; byte2=0x3D & AX { AX = AX << 3; }
+
+# SHLW AX, 4
+:SHLW AX,4 is byte1=0x31; byte2=0x4D & AX { AX = AX << 4; }
+
+# SHLW AX, 5
+:SHLW AX,5 is byte1=0x31; byte2=0x5D & AX { AX = AX << 5; }
+
+# SHLW AX, 6
+:SHLW AX,6 is byte1=0x31; byte2=0x6D & AX { AX = AX << 6; }
+
+# SHLW AX, 7
+:SHLW AX,7 is byte1=0x31; byte2=0x7D & AX { AX = AX << 7; }
+
+# SHLW AX, 8
+:SHLW AX,8 is byte1=0x31; byte2=0x8D & AX { AX = AX << 8; }
+
+# SHLW AX, 9
+:SHLW AX,9 is byte1=0x31; byte2=0x9D & AX { AX = AX << 9; }
+
+# SHLW AX, 10
+:SHLW AX,10 is byte1=0x31; byte2=0xAD & AX { AX = AX << 10; }
+
+# SHLW AX, 11
+:SHLW AX,11 is byte1=0x31; byte2=0xBD & AX { AX = AX << 11; }
+
+# SHLW AX, 12
+:SHLW AX,12 is byte1=0x31; byte2=0xCD & AX { AX = AX << 12; }
+
+# SHLW AX, 13
+:SHLW AX,13 is byte1=0x31; byte2=0xDD & AX { AX = AX << 13; }
+
+# SHLW AX, 14
+:SHLW AX,14 is byte1=0x31; byte2=0xED & AX { AX = AX << 14; }
+
+# SHLW AX, 15
+:SHLW AX,15 is byte1=0x31; byte2=0xFD & AX { AX = AX << 15; }
+
+# SHLW BC, 1
+:SHLW BC,1 is byte1=0x31; byte2=0x1C & BC { BC = BC << 1; }
+
+# SHLW BC, 2
+:SHLW BC,2 is byte1=0x31; byte2=0x2C & BC { BC = BC << 2; }
+
+# SHLW BC, 3
+:SHLW BC,3 is byte1=0x31; byte2=0x3C & BC { BC = BC << 3; }
+
+# SHLW BC, 4
+:SHLW BC,4 is byte1=0x31; byte2=0x4C & BC { BC = BC << 4; }
+
+# SHLW BC, 5
+:SHLW BC,5 is byte1=0x31; byte2=0x5C & BC { BC = BC << 5; }
+
+# SHLW BC, 6
+:SHLW BC,6 is byte1=0x31; byte2=0x6C & BC { BC = BC << 6; }
+
+# SHLW BC, 7
+:SHLW BC,7 is byte1=0x31; byte2=0x7C & BC { BC = BC << 7; }
+
+# SHLW BC, 8
+:SHLW BC,8 is byte1=0x31; byte2=0x8C & BC { BC = BC << 8; }
+
+# SHLW BC, 9
+:SHLW BC,9 is byte1=0x31; byte2=0x9C & BC { BC = BC << 9; }
+
+# SHLW BC, 10
+:SHLW BC,10 is byte1=0x31; byte2=0xAC & BC { BC = BC << 10; }
+
+# SHLW BC, 11
+:SHLW BC,11 is byte1=0x31; byte2=0xBC & BC { BC = BC << 11; }
+
+# SHLW BC, 12
+:SHLW BC,12 is byte1=0x31; byte2=0xCC & BC { BC = BC << 12; }
+
+# SHLW BC, 13
+:SHLW BC,13 is byte1=0x31; byte2=0xDC & BC { BC = BC << 13; }
+
+# SHLW BC, 14
+:SHLW BC,14 is byte1=0x31; byte2=0xEC & BC { BC = BC << 14; }
+
+# SHLW BC, 15
+:SHLW BC,15 is byte1=0x31; byte2=0xFC & BC { BC = BC << 15; }
+
+# SAR A, 1
+:SAR A,1 is byte1=0x31; byte2=0x1B & A {}
+
+# SAR A, 2
+:SAR A,2 is byte1=0x31; byte2=0x2B & A {}
+
+# SAR A, 3
+:SAR A,3 is byte1=0x31; byte2=0x3B & A {}
+
+# SAR A, 4
+:SAR A,4 is byte1=0x31; byte2=0x4B & A {}
+
+# SAR A, 5
+:SAR A,5 is byte1=0x31; byte2=0x5B & A {}
+
+# SAR A, 6
+:SAR A,6 is byte1=0x31; byte2=0x6B & A {}
+
+# SAR A, 7
+:SAR A,7 is byte1=0x31; byte2=0x7B & A {}
+
+# SARW AX, 1
+:SARW AX,1 is byte1=0x31; byte2=0x1F & AX {}
+
+# SARW AX, 2
+:SARW AX,2 is byte1=0x31; byte2=0x2F & AX {}
+
+# SARW AX, 3
+:SARW AX,3 is byte1=0x31; byte2=0x3F & AX {}
+
+# SARW AX, 4
+:SARW AX,4 is byte1=0x31; byte2=0x4F & AX {}
+
+# SARW AX, 5
+:SARW AX,5 is byte1=0x31; byte2=0x5F & AX {}
+
+# SARW AX, 6
+:SARW AX,6 is byte1=0x31; byte2=0x6F & AX {}
+
+# SARW AX, 7
+:SARW AX,7 is byte1=0x31; byte2=0x7F & AX {}
+
+# SARW AX, 8
+:SARW AX,8 is byte1=0x31; byte2=0x8F & AX {}
+
+# SARW AX, 9
+:SARW AX,9 is byte1=0x31; byte2=0x9F & AX {}
+
+# SARW AX, 10
+:SARW AX,10 is byte1=0x31; byte2=0xAF & AX {}
+
+# SARW AX, 11
+:SARW AX,11 is byte1=0x31; byte2=0xBF & AX {}
+
+# SARW AX, 12
+:SARW AX,12 is byte1=0x31; byte2=0xCF & AX {}
+
+# SARW AX, 13
+:SARW AX,13 is byte1=0x31; byte2=0xDF & AX {}
+
+# SARW AX, 14
+:SARW AX,14 is byte1=0x31; byte2=0xEF & AX {}
+
+# SARW AX, 15
+:SARW AX,15 is byte1=0x31; byte2=0xFF & AX {}
+
+###################################
+#
+## Rotate Instructions
+#
+###################################
+
+# ROR A, 1
+:ROR A,1 is byte1=0x61; byte2=0xDB & A {}
+
+# ROL A, 1
+:ROL A,1 is byte1=0x61; byte2=0xEB & A {}
+
+# RORC A, 1
+:RORC A,1 is byte1=0x61; byte2=0xFB & A {}
+
+# ROLC A, 1
+:ROLC A,1 is byte1=0x61; byte2=0xDC & A {}
+
+# ROLWC AX, 1
+:ROLWC AX,1 is byte1=0x61; byte2=0xEE & AX {}
+
+# ROLWC BC, 1
+:ROLWC BC,1 is byte1=0x61; byte2=0xFE & BC {}
+
+###################################
+#
+## Bit Manipulation Instructions
+#
+###################################
+
+# MOV1 CY, saddr.0
+:MOV1 CY,ShortAddr_Bit0 is byte1=0x71; byte2=0x04; ShortAddr_Bit0 & CY {}
+
+# MOV1 CY, saddr.1
+:MOV1 CY,ShortAddr_Bit1 is byte1=0x71; byte2=0x14; ShortAddr_Bit1 & CY {}
+
+# MOV1 CY, saddr.2
+:MOV1 CY,ShortAddr_Bit2 is byte1=0x71; byte2=0x24; ShortAddr_Bit2 & CY {}
+
+# MOV1 CY, saddr.3
+:MOV1 CY,ShortAddr_Bit3 is byte1=0x71; byte2=0x34; ShortAddr_Bit3 & CY {}
+
+# MOV1 CY, saddr.4
+:MOV1 CY,ShortAddr_Bit4 is byte1=0x71; byte2=0x44; ShortAddr_Bit4 & CY {}
+
+# MOV1 CY, saddr.5
+:MOV1 CY,ShortAddr_Bit5 is byte1=0x71; byte2=0x54; ShortAddr_Bit5 & CY {}
+
+# MOV1 CY, saddr.6
+:MOV1 CY,ShortAddr_Bit6 is byte1=0x71; byte2=0x64; ShortAddr_Bit6 & CY {}
+
+# MOV1 CY, saddr.7
+:MOV1 CY,ShortAddr_Bit7 is byte1=0x71; byte2=0x74; ShortAddr_Bit7 & CY {}
+
+# MOV1 CY, sfr.0
+:MOV1 CY,Sfr_Bit0 is byte1=0x71; byte2=0x0C; Sfr_Bit0 & CY {}
+
+# MOV1 CY, sfr.1
+:MOV1 CY,Sfr_Bit1 is byte1=0x71; byte2=0x1C; Sfr_Bit1 & CY {}
+
+# MOV1 CY, sfr.2
+:MOV1 CY,Sfr_Bit2 is byte1=0x71; byte2=0x2C; Sfr_Bit2 & CY {}
+
+# MOV1 CY, sfr.3
+:MOV1 CY,Sfr_Bit3 is byte1=0x71; byte2=0x3C; Sfr_Bit3 & CY {}
+
+# MOV1 CY, sfr.4
+:MOV1 CY,Sfr_Bit4 is byte1=0x71; byte2=0x4C; Sfr_Bit4 & CY {}
+
+# MOV1 CY, sfr.5
+:MOV1 CY,Sfr_Bit5 is byte1=0x71; byte2=0x5C; Sfr_Bit5 & CY {}
+
+# MOV1 CY, sfr.6
+:MOV1 CY,Sfr_Bit6 is byte1=0x71; byte2=0x6C; Sfr_Bit6 & CY {}
+
+# MOV1 CY, sfr.7
+:MOV1 CY,Sfr_Bit7 is byte1=0x71; byte2=0x7C; Sfr_Bit7 & CY {}
+
+# MOV1 CY, A.0
+:MOV1 CY,A_Bit0 is byte1=0x71; byte2=0x8C & CY & A_Bit0 {}
+
+# MOV1 CY, A.1
+:MOV1 CY,A_Bit1 is byte1=0x71; byte2=0x9C & CY & A_Bit1 {}
+
+# MOV1 CY, A.2
+:MOV1 CY,A_Bit2 is byte1=0x71; byte2=0xAC & CY & A_Bit2 {}
+
+# MOV1 CY, A.3
+:MOV1 CY,A_Bit3 is byte1=0x71; byte2=0xBC & CY & A_Bit3 {}
+
+# MOV1 CY, A.4
+:MOV1 CY,A_Bit4 is byte1=0x71; byte2=0xCC & CY & A_Bit4 {}
+
+# MOV1 CY, A.5
+:MOV1 CY,A_Bit5 is byte1=0x71; byte2=0xDC & CY & A_Bit5 {}
+
+# MOV1 CY, A.6
+:MOV1 CY,A_Bit6 is byte1=0x71; byte2=0xEC & CY & A_Bit6 {}
+
+# MOV1 CY, A.7
+:MOV1 CY,A_Bit7 is byte1=0x71; byte2=0xFC & CY & A_Bit7 {}
+
+# MOV1 CY, PSW.0
+:MOV1 CY,PSW_Bit0 is byte1=0x71; byte2=0x0C; byte3=0xFA & CY & PSW_Bit0 {}
+
+# MOV1 CY, PSW.1
+:MOV1 CY,PSW_Bit1 is byte1=0x71; byte2=0x1C; byte3=0xFA & CY & PSW_Bit1 {}
+
+# MOV1 CY, PSW.2
+:MOV1 CY,PSW_Bit2 is byte1=0x71; byte2=0x2C; byte3=0xFA & CY & PSW_Bit2 {}
+
+# MOV1 CY, PSW.3
+:MOV1 CY,PSW_Bit3 is byte1=0x71; byte2=0x3C; byte3=0xFA & CY & PSW_Bit3 {}
+
+# MOV1 CY, PSW.4
+:MOV1 CY,PSW_Bit4 is byte1=0x71; byte2=0x4C; byte3=0xFA & CY & PSW_Bit4 {}
+
+# MOV1 CY, PSW.5
+:MOV1 CY,PSW_Bit5 is byte1=0x71; byte2=0x5C; byte3=0xFA & CY & PSW_Bit5 {}
+
+# MOV1 CY, PSW.6
+:MOV1 CY,PSW_Bit6 is byte1=0x71; byte2=0x6C; byte3=0xFA & CY & PSW_Bit6 {}
+
+# MOV1 CY, PSW.7
+:MOV1 CY,PSW_Bit7 is byte1=0x71; byte2=0x7C; byte3=0xFA & CY & PSW_Bit7 {}
+
+# MOV1 CY, [HL].0
+:MOV1 CY,AddrHL_Bit0 is byte1=0x71; byte2=0x84; AddrHL_Bit0 & CY {}
+
+# MOV1 CY, [HL].1
+:MOV1 CY,AddrHL_Bit1 is byte1=0x71; byte2=0x94; AddrHL_Bit1 & CY {}
+
+# MOV1 CY, [HL].2
+:MOV1 CY,AddrHL_Bit2 is byte1=0x71; byte2=0xA4; AddrHL_Bit2 & CY {}
+
+# MOV1 CY, [HL].3
+:MOV1 CY,AddrHL_Bit3 is byte1=0x71; byte2=0xB4; AddrHL_Bit3 & CY {}
+
+# MOV1 CY, [HL].4
+:MOV1 CY,AddrHL_Bit4 is byte1=0x71; byte2=0xC4; AddrHL_Bit4 & CY {}
+
+# MOV1 CY, [HL].5
+:MOV1 CY,AddrHL_Bit5 is byte1=0x71; byte2=0xD4; AddrHL_Bit5 & CY {}
+
+# MOV1 CY, [HL].6
+:MOV1 CY,AddrHL_Bit6 is byte1=0x71; byte2=0xE4; AddrHL_Bit6 & CY {}
+
+# MOV1 CY, [HL].7
+:MOV1 CY,AddrHL_Bit7 is byte1=0x71; byte2=0xF4; AddrHL_Bit7 & CY {}
+
+# MOV1 saddr.0, CY
+:MOV1 ShortAddr_Bit0,CY is byte1=0x71; byte2=0x01; ShortAddr_Bit0 & CY {}
+
+# MOV1 saddr.1, CY
+:MOV1 ShortAddr_Bit1,CY is byte1=0x71; byte2=0x11; ShortAddr_Bit1 & CY {}
+
+# MOV1 saddr.2, CY
+:MOV1 ShortAddr_Bit2,CY is byte1=0x71; byte2=0x21; ShortAddr_Bit2 & CY {}
+
+# MOV1 saddr.3, CY
+:MOV1 ShortAddr_Bit3,CY is byte1=0x71; byte2=0x31; ShortAddr_Bit3 & CY {}
+
+# MOV1 saddr.4, CY
+:MOV1 ShortAddr_Bit4,CY is byte1=0x71; byte2=0x41; ShortAddr_Bit4 & CY {}
+
+# MOV1 saddr.5, CY
+:MOV1 ShortAddr_Bit5,CY is byte1=0x71; byte2=0x51; ShortAddr_Bit5 & CY {}
+
+# MOV1 saddr.6, CY
+:MOV1 ShortAddr_Bit6,CY is byte1=0x71; byte2=0x61; ShortAddr_Bit6 & CY {}
+
+# MOV1 saddr.7, CY
+:MOV1 ShortAddr_Bit7,CY is byte1=0x71; byte2=0x71; ShortAddr_Bit7 & CY {}
+
+# MOV1 sfr.0, CY
+:MOV1 Sfr_Bit0,CY is byte1=0x71; byte2=0x09; Sfr_Bit0 & CY {}
+
+# MOV1 sfr.1, CY
+:MOV1 Sfr_Bit1,CY is byte1=0x71; byte2=0x19; Sfr_Bit1 & CY {}
+
+# MOV1 sfr.2, CY
+:MOV1 Sfr_Bit2,CY is byte1=0x71; byte2=0x29; Sfr_Bit2 & CY {}
+
+# MOV1 sfr.3, CY
+:MOV1 Sfr_Bit3,CY is byte1=0x71; byte2=0x39; Sfr_Bit3 & CY {}
+
+# MOV1 sfr.4, CY
+:MOV1 Sfr_Bit4,CY is byte1=0x71; byte2=0x49; Sfr_Bit4 & CY {}
+
+# MOV1 sfr.5, CY
+:MOV1 Sfr_Bit5,CY is byte1=0x71; byte2=0x59; Sfr_Bit5 & CY {}
+
+# MOV1 sfr.6, CY
+:MOV1 Sfr_Bit6,CY is byte1=0x71; byte2=0x69; Sfr_Bit6 & CY {}
+
+# MOV1 sfr.7, CY
+:MOV1 Sfr_Bit7,CY is byte1=0x71; byte2=0x79; Sfr_Bit7 & CY {}
+
+# MOV1 A.0, CY
+:MOV1 A_Bit0,CY is byte1=0x71; byte2=0x89 & A_Bit0 & CY {}
+
+# MOV1 A.1, CY
+:MOV1 A_Bit1,CY is byte1=0x71; byte2=0x99 & A_Bit1 & CY {}
+
+# MOV1 A.2, CY
+:MOV1 A_Bit2,CY is byte1=0x71; byte2=0xA9 & A_Bit2 & CY {}
+
+# MOV1 A.3, CY
+:MOV1 A_Bit3,CY is byte1=0x71; byte2=0xB9 & A_Bit3 & CY {}
+
+# MOV1 A.4, CY
+:MOV1 A_Bit4,CY is byte1=0x71; byte2=0xC9 & A_Bit4 & CY {}
+
+# MOV1 A.5, CY
+:MOV1 A_Bit5,CY is byte1=0x71; byte2=0xD9 & A_Bit5 & CY {}
+
+# MOV1 A.6, CY
+:MOV1 A_Bit6,CY is byte1=0x71; byte2=0xE9 & A_Bit6 & CY {}
+
+# MOV1 A.7, CY
+:MOV1 A_Bit7,CY is byte1=0x71; byte2=0xF9 & A_Bit7 & CY {}
+
+# MOV1 PSW.0, CY
+:MOV1 PSW_Bit0,CY is byte1=0x71; byte2=0x09; byte3=0xFA & PSW_Bit0 & CY {}
+
+# MOV1 PSW.1, CY
+:MOV1 PSW_Bit1,CY is byte1=0x71; byte2=0x19; byte3=0xFA & PSW_Bit1 & CY {}
+
+# MOV1 PSW.2, CY
+:MOV1 PSW_Bit2,CY is byte1=0x71; byte2=0x29; byte3=0xFA & PSW_Bit2 & CY {}
+
+# MOV1 PSW.3, CY
+:MOV1 PSW_Bit3,CY is byte1=0x71; byte2=0x39; byte3=0xFA & PSW_Bit3 & CY {}
+
+# MOV1 PSW.4, CY
+:MOV1 PSW_Bit4,CY is byte1=0x71; byte2=0x49; byte3=0xFA & PSW_Bit4 & CY {}
+
+# MOV1 PSW.5, CY
+:MOV1 PSW_Bit5,CY is byte1=0x71; byte2=0x59; byte3=0xFA & PSW_Bit5 & CY {}
+
+# MOV1 PSW.6, CY
+:MOV1 PSW_Bit6,CY is byte1=0x71; byte2=0x69; byte3=0xFA & PSW_Bit6 & CY {}
+
+# MOV1 PSW.7, CY
+:MOV1 PSW_Bit7,CY is byte1=0x71; byte2=0x79; byte3=0xFA & PSW_Bit7 & CY {}
+
+# MOV1 [HL].0, CY
+:MOV1 AddrHL_Bit0,CY is byte1=0x71; byte2=0x81; AddrHL_Bit0 & CY {}
+
+# MOV1 [HL].1, CY
+:MOV1 AddrHL_Bit1,CY is byte1=0x71; byte2=0x91; AddrHL_Bit1 & CY {}
+
+# MOV1 [HL].2, CY
+:MOV1 AddrHL_Bit2,CY is byte1=0x71; byte2=0xA1; AddrHL_Bit2 & CY {}
+
+# MOV1 [HL].3, CY
+:MOV1 AddrHL_Bit3,CY is byte1=0x71; byte2=0xB1; AddrHL_Bit3 & CY {}
+
+# MOV1 [HL].4, CY
+:MOV1 AddrHL_Bit4,CY is byte1=0x71; byte2=0xC1; AddrHL_Bit4 & CY {}
+
+# MOV1 [HL].5, CY
+:MOV1 AddrHL_Bit5,CY is byte1=0x71; byte2=0xD1; AddrHL_Bit5 & CY {}
+
+# MOV1 [HL].6, CY
+:MOV1 AddrHL_Bit6,CY is byte1=0x71; byte2=0xE1; AddrHL_Bit6 & CY {}
+
+# MOV1 [HL].7, CY
+:MOV1 AddrHL_Bit7,CY is byte1=0x71; byte2=0xF1; AddrHL_Bit7 & CY {}
+
+# MOV1 CY, ES:[HL].0
+:MOV1 CY,ESAddrHL_Bit0 is byte1=0x11; byte2=0x71; byte3=0x84; ESAddrHL_Bit0 & CY {}
+
+# MOV1 CY, ES:[HL].1
+:MOV1 CY,ESAddrHL_Bit1 is byte1=0x11; byte2=0x71; byte3=0x94; ESAddrHL_Bit1 & CY {}
+
+# MOV1 CY, ES:[HL].2
+:MOV1 CY,ESAddrHL_Bit2 is byte1=0x11; byte2=0x71; byte3=0xA4; ESAddrHL_Bit2 & CY {}
+
+# MOV1 CY, ES:[HL].3
+:MOV1 CY,ESAddrHL_Bit3 is byte1=0x11; byte2=0x71; byte3=0xB4; ESAddrHL_Bit3 & CY {}
+
+# MOV1 CY, ES:[HL].4
+:MOV1 CY,ESAddrHL_Bit4 is byte1=0x11; byte2=0x71; byte3=0xC4; ESAddrHL_Bit4 & CY {}
+
+# MOV1 CY, ES:[HL].5
+:MOV1 CY,ESAddrHL_Bit5 is byte1=0x11; byte2=0x71; byte3=0xD4; ESAddrHL_Bit5 & CY {}
+
+# MOV1 CY, ES:[HL].6
+:MOV1 CY,ESAddrHL_Bit6 is byte1=0x11; byte2=0x71; byte3=0xE4; ESAddrHL_Bit6 & CY {}
+
+# MOV1 CY, ES:[HL].7
+:MOV1 CY,ESAddrHL_Bit7 is byte1=0x11; byte2=0x71; byte3=0xF4; ESAddrHL_Bit7 & CY {}
+
+# MOV1 ES:[HL].0, CY
+:MOV1 ESAddrHL_Bit0,CY is byte1=0x11; byte2=0x71; byte3=0x81; ESAddrHL_Bit0 & CY {}
+
+# MOV1 ES:[HL].1, CY
+:MOV1 ESAddrHL_Bit1,CY is byte1=0x11; byte2=0x71; byte3=0x91; ESAddrHL_Bit1 & CY {}
+
+# MOV1 ES:[HL].2, CY
+:MOV1 ESAddrHL_Bit2,CY is byte1=0x11; byte2=0x71; byte3=0xA1; ESAddrHL_Bit2 & CY {}
+
+# MOV1 ES:[HL].3, CY
+:MOV1 ESAddrHL_Bit3,CY is byte1=0x11; byte2=0x71; byte3=0xB1; ESAddrHL_Bit3 & CY {}
+
+# MOV1 ES:[HL].4, CY
+:MOV1 ESAddrHL_Bit4,CY is byte1=0x11; byte2=0x71; byte3=0xC1; ESAddrHL_Bit4 & CY {}
+
+# MOV1 ES:[HL].5, CY
+:MOV1 ESAddrHL_Bit5,CY is byte1=0x11; byte2=0x71; byte3=0xD1; ESAddrHL_Bit5 & CY {}
+
+# MOV1 ES:[HL].6, CY
+:MOV1 ESAddrHL_Bit6,CY is byte1=0x11; byte2=0x71; byte3=0xE1; ESAddrHL_Bit6 & CY {}
+
+# MOV1 ES:[HL].7, CY
+:MOV1 ESAddrHL_Bit7,CY is byte1=0x11; byte2=0x71; byte3=0xF1; ESAddrHL_Bit7 & CY {}
+
+# AND1 CY, saddr.0
+:AND1 CY,ShortAddr_Bit0 is byte1=0x71; byte2=0x05; ShortAddr_Bit0 & CY {}
+
+# AND1 CY, saddr.1
+:AND1 CY,ShortAddr_Bit1 is byte1=0x71; byte2=0x15; ShortAddr_Bit1 & CY {}
+
+# AND1 CY, saddr.2
+:AND1 CY,ShortAddr_Bit2 is byte1=0x71; byte2=0x25; ShortAddr_Bit2 & CY {}
+
+# AND1 CY, saddr.3
+:AND1 CY,ShortAddr_Bit3 is byte1=0x71; byte2=0x35; ShortAddr_Bit3 & CY {}
+
+# AND1 CY, saddr.4
+:AND1 CY,ShortAddr_Bit4 is byte1=0x71; byte2=0x45; ShortAddr_Bit4 & CY {}
+
+# AND1 CY, saddr.5
+:AND1 CY,ShortAddr_Bit5 is byte1=0x71; byte2=0x55; ShortAddr_Bit5 & CY {}
+
+# AND1 CY, saddr.6
+:AND1 CY,ShortAddr_Bit6 is byte1=0x71; byte2=0x65; ShortAddr_Bit6 & CY {}
+
+# AND1 CY, saddr.7
+:AND1 CY,ShortAddr_Bit7 is byte1=0x71; byte2=0x75; ShortAddr_Bit7 & CY {}
+
+# AND1 CY, sfr.0
+:AND1 CY,Sfr_Bit0 is byte1=0x71; byte2=0x0D; Sfr_Bit0 & CY {}
+
+# AND1 CY, sfr.1
+:AND1 CY,Sfr_Bit1 is byte1=0x71; byte2=0x1D; Sfr_Bit1 & CY {}
+
+# AND1 CY, sfr.2
+:AND1 CY,Sfr_Bit2 is byte1=0x71; byte2=0x2D; Sfr_Bit2 & CY {}
+
+# AND1 CY, sfr.3
+:AND1 CY,Sfr_Bit3 is byte1=0x71; byte2=0x3D; Sfr_Bit3 & CY {}
+
+# AND1 CY, sfr.4
+:AND1 CY,Sfr_Bit4 is byte1=0x71; byte2=0x4D; Sfr_Bit4 & CY {}
+
+# AND1 CY, sfr.5
+:AND1 CY,Sfr_Bit5 is byte1=0x71; byte2=0x5D; Sfr_Bit5 & CY {}
+
+# AND1 CY, sfr.6
+:AND1 CY,Sfr_Bit6 is byte1=0x71; byte2=0x6D; Sfr_Bit6 & CY {}
+
+# AND1 CY, sfr.7
+:AND1 CY,Sfr_Bit7 is byte1=0x71; byte2=0x7D; Sfr_Bit7 & CY {}
+
+# AND1 CY, A.0
+:AND1 CY,A_Bit0 is byte1=0x71; byte2=0x8D & CY & A_Bit0 {}
+
+# AND1 CY, A.1
+:AND1 CY,A_Bit1 is byte1=0x71; byte2=0x9D & CY & A_Bit1 {}
+
+# AND1 CY, A.2
+:AND1 CY,A_Bit2 is byte1=0x71; byte2=0xAD & CY & A_Bit2 {}
+
+# AND1 CY, A.3
+:AND1 CY,A_Bit3 is byte1=0x71; byte2=0xBD & CY & A_Bit3 {}
+
+# AND1 CY, A.4
+:AND1 CY,A_Bit4 is byte1=0x71; byte2=0xCD & CY & A_Bit4 {}
+
+# AND1 CY, A.5
+:AND1 CY,A_Bit5 is byte1=0x71; byte2=0xDD & CY & A_Bit5 {}
+
+# AND1 CY, A.6
+:AND1 CY,A_Bit6 is byte1=0x71; byte2=0xED & CY & A_Bit6 {}
+
+# AND1 CY, A.7
+:AND1 CY,A_Bit7 is byte1=0x71; byte2=0xFD & CY & A_Bit7 {}
+
+# AND1 CY, PSW.0
+:AND1 CY,PSW_Bit0 is byte1=0x71; byte2=0x0D; byte3=0xFA & CY & PSW_Bit0 {}
+
+# AND1 CY, PSW.1
+:AND1 CY,PSW_Bit1 is byte1=0x71; byte2=0x1D; byte3=0xFA & CY & PSW_Bit1 {}
+
+# AND1 CY, PSW.2
+:AND1 CY,PSW_Bit2 is byte1=0x71; byte2=0x2D; byte3=0xFA & CY & PSW_Bit2 {}
+
+# AND1 CY, PSW.3
+:AND1 CY,PSW_Bit3 is byte1=0x71; byte2=0x3D; byte3=0xFA & CY & PSW_Bit3 {}
+
+# AND1 CY, PSW.4
+:AND1 CY,PSW_Bit4 is byte1=0x71; byte2=0x4D; byte3=0xFA & CY & PSW_Bit4 {}
+
+# AND1 CY, PSW.5
+:AND1 CY,PSW_Bit5 is byte1=0x71; byte2=0x5D; byte3=0xFA & CY & PSW_Bit5 {}
+
+# AND1 CY, PSW.6
+:AND1 CY,PSW_Bit6 is byte1=0x71; byte2=0x6D; byte3=0xFA & CY & PSW_Bit6 {}
+
+# AND1 CY, PSW.7
+:AND1 CY,PSW_Bit7 is byte1=0x71; byte2=0x7D; byte3=0xFA & CY & PSW_Bit7 {}
+
+# AND1 CY, [HL].0
+:AND1 CY,AddrHL_Bit0 is byte1=0x71; byte2=0x85; AddrHL_Bit0 & CY {}
+
+# AND1 CY, [HL].1
+:AND1 CY,AddrHL_Bit1 is byte1=0x71; byte2=0x95; AddrHL_Bit1 & CY {}
+
+# AND1 CY, [HL].2
+:AND1 CY,AddrHL_Bit2 is byte1=0x71; byte2=0xA5; AddrHL_Bit2 & CY {}
+
+# AND1 CY, [HL].3
+:AND1 CY,AddrHL_Bit3 is byte1=0x71; byte2=0xB5; AddrHL_Bit3 & CY {}
+
+# AND1 CY, [HL].4
+:AND1 CY,AddrHL_Bit4 is byte1=0x71; byte2=0xC5; AddrHL_Bit4 & CY {}
+
+# AND1 CY, [HL].5
+:AND1 CY,AddrHL_Bit5 is byte1=0x71; byte2=0xD5; AddrHL_Bit5 & CY {}
+
+# AND1 CY, [HL].6
+:AND1 CY,AddrHL_Bit6 is byte1=0x71; byte2=0xE5; AddrHL_Bit6 & CY {}
+
+# AND1 CY, [HL].7
+:AND1 CY,AddrHL_Bit7 is byte1=0x71; byte2=0xF5; AddrHL_Bit7 & CY {}
+
+# AND1 CY, ES:[HL].0
+:AND1 CY,ESAddrHL_Bit0 is byte1=0x11; byte2=0x71; byte3=0x85; ESAddrHL_Bit0 & CY {}
+
+# AND1 CY, ES:[HL].1
+:AND1 CY,ESAddrHL_Bit1 is byte1=0x11; byte2=0x71; byte3=0x95; ESAddrHL_Bit1 & CY {}
+
+# AND1 CY, ES:[HL].2
+:AND1 CY,ESAddrHL_Bit2 is byte1=0x11; byte2=0x71; byte3=0xA5; ESAddrHL_Bit2 & CY {}
+
+# AND1 CY, ES:[HL].3
+:AND1 CY,ESAddrHL_Bit3 is byte1=0x11; byte2=0x71; byte3=0xB5; ESAddrHL_Bit3 & CY {}
+
+# AND1 CY, ES:[HL].4
+:AND1 CY,ESAddrHL_Bit4 is byte1=0x11; byte2=0x71; byte3=0xC5; ESAddrHL_Bit4 & CY {}
+
+# AND1 CY, ES:[HL].5
+:AND1 CY,ESAddrHL_Bit5 is byte1=0x11; byte2=0x71; byte3=0xD5; ESAddrHL_Bit5 & CY {}
+
+# AND1 CY, ES:[HL].6
+:AND1 CY,ESAddrHL_Bit6 is byte1=0x11; byte2=0x71; byte3=0xE5; ESAddrHL_Bit6 & CY {}
+
+# AND1 CY, ES:[HL].7
+:AND1 CY,ESAddrHL_Bit7 is byte1=0x11; byte2=0x71; byte3=0xF5; ESAddrHL_Bit7 & CY {}
+
+# OR1 CY, saddr.0
+:OR1 CY,ShortAddr_Bit0 is byte1=0x71; byte2=0x06; ShortAddr_Bit0 & CY {}
+
+# OR1 CY, saddr.1
+:OR1 CY,ShortAddr_Bit1 is byte1=0x71; byte2=0x16; ShortAddr_Bit1 & CY {}
+
+# OR1 CY, saddr.2
+:OR1 CY,ShortAddr_Bit2 is byte1=0x71; byte2=0x26; ShortAddr_Bit2 & CY {}
+
+# OR1 CY, saddr.3
+:OR1 CY,ShortAddr_Bit3 is byte1=0x71; byte2=0x36; ShortAddr_Bit3 & CY {}
+
+# OR1 CY, saddr.4
+:OR1 CY,ShortAddr_Bit4 is byte1=0x71; byte2=0x46; ShortAddr_Bit4 & CY {}
+
+# OR1 CY, saddr.5
+:OR1 CY,ShortAddr_Bit5 is byte1=0x71; byte2=0x56; ShortAddr_Bit5 & CY {}
+
+# OR1 CY, saddr.6
+:OR1 CY,ShortAddr_Bit6 is byte1=0x71; byte2=0x66; ShortAddr_Bit6 & CY {}
+
+# OR1 CY, saddr.7
+:OR1 CY,ShortAddr_Bit7 is byte1=0x71; byte2=0x76; ShortAddr_Bit7 & CY {}
+
+# OR1 CY, sfr.0
+:OR1 CY,Sfr_Bit0 is byte1=0x71; byte2=0x0E; Sfr_Bit0 & CY {}
+
+# OR1 CY, sfr.1
+:OR1 CY,Sfr_Bit1 is byte1=0x71; byte2=0x1E; Sfr_Bit1 & CY {}
+
+# OR1 CY, sfr.2
+:OR1 CY,Sfr_Bit2 is byte1=0x71; byte2=0x2E; Sfr_Bit2 & CY {}
+
+# OR1 CY, sfr.3
+:OR1 CY,Sfr_Bit3 is byte1=0x71; byte2=0x3E; Sfr_Bit3 & CY {}
+
+# OR1 CY, sfr.4
+:OR1 CY,Sfr_Bit4 is byte1=0x71; byte2=0x4E; Sfr_Bit4 & CY {}
+
+# OR1 CY, sfr.5
+:OR1 CY,Sfr_Bit5 is byte1=0x71; byte2=0x5E; Sfr_Bit5 & CY {}
+
+# OR1 CY, sfr.6
+:OR1 CY,Sfr_Bit6 is byte1=0x71; byte2=0x6E; Sfr_Bit6 & CY {}
+
+# OR1 CY, sfr.7
+:OR1 CY,Sfr_Bit7 is byte1=0x71; byte2=0x7E; Sfr_Bit7 & CY {}
+
+# OR1 CY, A.0
+:OR1 CY,A_Bit0 is byte1=0x71; byte2=0x8E & CY & A_Bit0 {}
+
+# OR1 CY, A.1
+:OR1 CY,A_Bit1 is byte1=0x71; byte2=0x9E & CY & A_Bit1 {}
+
+# OR1 CY, A.2
+:OR1 CY,A_Bit2 is byte1=0x71; byte2=0xAE & CY & A_Bit2 {}
+
+# OR1 CY, A.3
+:OR1 CY,A_Bit3 is byte1=0x71; byte2=0xBE & CY & A_Bit3 {}
+
+# OR1 CY, A.4
+:OR1 CY,A_Bit4 is byte1=0x71; byte2=0xCE & CY & A_Bit4 {}
+
+# OR1 CY, A.5
+:OR1 CY,A_Bit5 is byte1=0x71; byte2=0xDE & CY & A_Bit5 {}
+
+# OR1 CY, A.6
+:OR1 CY,A_Bit6 is byte1=0x71; byte2=0xEE & CY & A_Bit6 {}
+
+# OR1 CY, A.7
+:OR1 CY,A_Bit7 is byte1=0x71; byte2=0xFE & CY & A_Bit7 {}
+
+# OR1 CY, PSW.0
+:OR1 CY,PSW_Bit0 is byte1=0x71; byte2=0x0E; byte3=0xFA & CY & PSW_Bit0 {}
+
+# OR1 CY, PSW.1
+:OR1 CY,PSW_Bit1 is byte1=0x71; byte2=0x1E; byte3=0xFA & CY & PSW_Bit1 {}
+
+# OR1 CY, PSW.2
+:OR1 CY,PSW_Bit2 is byte1=0x71; byte2=0x2E; byte3=0xFA & CY & PSW_Bit2 {}
+
+# OR1 CY, PSW.3
+:OR1 CY,PSW_Bit3 is byte1=0x71; byte2=0x3E; byte3=0xFA & CY & PSW_Bit3 {}
+
+# OR1 CY, PSW.4
+:OR1 CY,PSW_Bit4 is byte1=0x71; byte2=0x4E; byte3=0xFA & CY & PSW_Bit4 {}
+
+# OR1 CY, PSW.5
+:OR1 CY,PSW_Bit5 is byte1=0x71; byte2=0x5E; byte3=0xFA & CY & PSW_Bit5 {}
+
+# OR1 CY, PSW.6
+:OR1 CY,PSW_Bit6 is byte1=0x71; byte2=0x6E; byte3=0xFA & CY & PSW_Bit6 {}
+
+# OR1 CY, PSW.7
+:OR1 CY,PSW_Bit7 is byte1=0x71; byte2=0x7E; byte3=0xFA & CY & PSW_Bit7 {}
+
+# OR1 CY, [HL].0
+:OR1 CY,AddrHL_Bit0 is byte1=0x71; byte2=0x86; AddrHL_Bit0 & CY {}
+
+# OR1 CY, [HL].1
+:OR1 CY,AddrHL_Bit1 is byte1=0x71; byte2=0x96; AddrHL_Bit1 & CY {}
+
+# OR1 CY, [HL].2
+:OR1 CY,AddrHL_Bit2 is byte1=0x71; byte2=0xA6; AddrHL_Bit2 & CY {}
+
+# OR1 CY, [HL].3
+:OR1 CY,AddrHL_Bit3 is byte1=0x71; byte2=0xB6; AddrHL_Bit3 & CY {}
+
+# OR1 CY, [HL].4
+:OR1 CY,AddrHL_Bit4 is byte1=0x71; byte2=0xC6; AddrHL_Bit4 & CY {}
+
+# OR1 CY, [HL].5
+:OR1 CY,AddrHL_Bit5 is byte1=0x71; byte2=0xD6; AddrHL_Bit5 & CY {}
+
+# OR1 CY, [HL].6
+:OR1 CY,AddrHL_Bit6 is byte1=0x71; byte2=0xE6; AddrHL_Bit6 & CY {}
+
+# OR1 CY, [HL].7
+:OR1 CY,AddrHL_Bit7 is byte1=0x71; byte2=0xF6; AddrHL_Bit7 & CY {}
+
+# OR1 CY, ES:[HL].0
+:OR1 CY,ESAddrHL_Bit0 is byte1=0x11; byte2=0x71; byte3=0x86; ESAddrHL_Bit0 & CY {}
+
+# OR1 CY, ES:[HL].1
+:OR1 CY,ESAddrHL_Bit1 is byte1=0x11; byte2=0x71; byte3=0x96; ESAddrHL_Bit1 & CY {}
+
+# OR1 CY, ES:[HL].2
+:OR1 CY,ESAddrHL_Bit2 is byte1=0x11; byte2=0x71; byte3=0xA6; ESAddrHL_Bit2 & CY {}
+
+# OR1 CY, ES:[HL].3
+:OR1 CY,ESAddrHL_Bit3 is byte1=0x11; byte2=0x71; byte3=0xB6; ESAddrHL_Bit3 & CY {}
+
+# OR1 CY, ES:[HL].4
+:OR1 CY,ESAddrHL_Bit4 is byte1=0x11; byte2=0x71; byte3=0xC6; ESAddrHL_Bit4 & CY {}
+
+# OR1 CY, ES:[HL].5
+:OR1 CY,ESAddrHL_Bit5 is byte1=0x11; byte2=0x71; byte3=0xD6; ESAddrHL_Bit5 & CY {}
+
+# OR1 CY, ES:[HL].6
+:OR1 CY,ESAddrHL_Bit6 is byte1=0x11; byte2=0x71; byte3=0xE6; ESAddrHL_Bit6 & CY {}
+
+# OR1 CY, ES:[HL].7
+:OR1 CY,ESAddrHL_Bit7 is byte1=0x11; byte2=0x71; byte3=0xF6; ESAddrHL_Bit7 & CY {}
+
+# XOR1 CY, saddr.0
+:XOR1 CY,ShortAddr_Bit0 is byte1=0x71; byte2=0x07; ShortAddr_Bit0 & CY {}
+
+# XOR1 CY, saddr.1
+:XOR1 CY,ShortAddr_Bit1 is byte1=0x71; byte2=0x17; ShortAddr_Bit1 & CY {}
+
+# XOR1 CY, saddr.2
+:XOR1 CY,ShortAddr_Bit2 is byte1=0x71; byte2=0x27; ShortAddr_Bit2 & CY {}
+
+# XOR1 CY, saddr.3
+:XOR1 CY,ShortAddr_Bit3 is byte1=0x71; byte2=0x37; ShortAddr_Bit3 & CY {}
+
+# XOR1 CY, saddr.4
+:XOR1 CY,ShortAddr_Bit4 is byte1=0x71; byte2=0x47; ShortAddr_Bit4 & CY {}
+
+# XOR1 CY, saddr.5
+:XOR1 CY,ShortAddr_Bit5 is byte1=0x71; byte2=0x57; ShortAddr_Bit5 & CY {}
+
+# XOR1 CY, saddr.6
+:XOR1 CY,ShortAddr_Bit6 is byte1=0x71; byte2=0x67; ShortAddr_Bit6 & CY {}
+
+# XOR1 CY, saddr.7
+:XOR1 CY,ShortAddr_Bit7 is byte1=0x71; byte2=0x77; ShortAddr_Bit7 & CY {}
+
+# XOR1 CY, sfr.0
+:XOR1 CY,Sfr_Bit0 is byte1=0x71; byte2=0x0F; Sfr_Bit0 & CY {}
+
+# XOR1 CY, sfr.1
+:XOR1 CY,Sfr_Bit1 is byte1=0x71; byte2=0x1F; Sfr_Bit1 & CY {}
+
+# XOR1 CY, sfr.2
+:XOR1 CY,Sfr_Bit2 is byte1=0x71; byte2=0x2F; Sfr_Bit2 & CY {}
+
+# XOR1 CY, sfr.3
+:XOR1 CY,Sfr_Bit3 is byte1=0x71; byte2=0x3F; Sfr_Bit3 & CY {}
+
+# XOR1 CY, sfr.4
+:XOR1 CY,Sfr_Bit4 is byte1=0x71; byte2=0x4F; Sfr_Bit4 & CY {}
+
+# XOR1 CY, sfr.5
+:XOR1 CY,Sfr_Bit5 is byte1=0x71; byte2=0x5F; Sfr_Bit5 & CY {}
+
+# XOR1 CY, sfr.6
+:XOR1 CY,Sfr_Bit6 is byte1=0x71; byte2=0x6F; Sfr_Bit6 & CY {}
+
+# XOR1 CY, sfr.7
+:XOR1 CY,Sfr_Bit7 is byte1=0x71; byte2=0x7F; Sfr_Bit7 & CY {}
+
+# XOR1 CY, A.0
+:XOR1 CY,A_Bit0 is byte1=0x71; byte2=0x8F & CY & A_Bit0 {}
+
+# XOR1 CY, A.1
+:XOR1 CY,A_Bit1 is byte1=0x71; byte2=0x9F & CY & A_Bit1 {}
+
+# XOR1 CY, A.2
+:XOR1 CY,A_Bit2 is byte1=0x71; byte2=0xAF & CY & A_Bit2 {}
+
+# XOR1 CY, A.3
+:XOR1 CY,A_Bit3 is byte1=0x71; byte2=0xBF & CY & A_Bit3 {}
+
+# XOR1 CY, A.4
+:XOR1 CY,A_Bit4 is byte1=0x71; byte2=0xCF & CY & A_Bit4 {}
+
+# XOR1 CY, A.5
+:XOR1 CY,A_Bit5 is byte1=0x71; byte2=0xDF & CY & A_Bit5 {}
+
+# XOR1 CY, A.6
+:XOR1 CY,A_Bit6 is byte1=0x71; byte2=0xEF & CY & A_Bit6 {}
+
+# XOR1 CY, A.7
+:XOR1 CY,A_Bit7 is byte1=0x71; byte2=0xFF & CY & A_Bit7 {}
+
+# XOR1 CY, PSW.0
+:XOR1 CY,PSW_Bit0 is byte1=0x71; byte2=0x0F; byte3=0xFA & CY & PSW_Bit0 {}
+
+# XOR1 CY, PSW.1
+:XOR1 CY,PSW_Bit1 is byte1=0x71; byte2=0x1F; byte3=0xFA & CY & PSW_Bit1 {}
+
+# XOR1 CY, PSW.2
+:XOR1 CY,PSW_Bit2 is byte1=0x71; byte2=0x2F; byte3=0xFA & CY & PSW_Bit2 {}
+
+# XOR1 CY, PSW.3
+:XOR1 CY,PSW_Bit3 is byte1=0x71; byte2=0x3F; byte3=0xFA & CY & PSW_Bit3 {}
+
+# XOR1 CY, PSW.4
+:XOR1 CY,PSW_Bit4 is byte1=0x71; byte2=0x4F; byte3=0xFA & CY & PSW_Bit4 {}
+
+# XOR1 CY, PSW.5
+:XOR1 CY,PSW_Bit5 is byte1=0x71; byte2=0x5F; byte3=0xFA & CY & PSW_Bit5 {}
+
+# XOR1 CY, PSW.6
+:XOR1 CY,PSW_Bit6 is byte1=0x71; byte2=0x6F; byte3=0xFA & CY & PSW_Bit6 {}
+
+# XOR1 CY, PSW.7
+:XOR1 CY,PSW_Bit7 is byte1=0x71; byte2=0x7F; byte3=0xFA & CY & PSW_Bit7 {}
+
+# XOR1 CY, [HL].0
+:XOR1 CY,AddrHL_Bit0 is byte1=0x71; byte2=0x87; AddrHL_Bit0 & CY {}
+
+# XOR1 CY, [HL].1
+:XOR1 CY,AddrHL_Bit1 is byte1=0x71; byte2=0x97; AddrHL_Bit1 & CY {}
+
+# XOR1 CY, [HL].2
+:XOR1 CY,AddrHL_Bit2 is byte1=0x71; byte2=0xA7; AddrHL_Bit2 & CY {}
+
+# XOR1 CY, [HL].3
+:XOR1 CY,AddrHL_Bit3 is byte1=0x71; byte2=0xB7; AddrHL_Bit3 & CY {}
+
+# XOR1 CY, [HL].4
+:XOR1 CY,AddrHL_Bit4 is byte1=0x71; byte2=0xC7; AddrHL_Bit4 & CY {}
+
+# XOR1 CY, [HL].5
+:XOR1 CY,AddrHL_Bit5 is byte1=0x71; byte2=0xD7; AddrHL_Bit5 & CY {}
+
+# XOR1 CY, [HL].6
+:XOR1 CY,AddrHL_Bit6 is byte1=0x71; byte2=0xE7; AddrHL_Bit6 & CY {}
+
+# XOR1 CY, [HL].7
+:XOR1 CY,AddrHL_Bit7 is byte1=0x71; byte2=0xF7; AddrHL_Bit7 & CY {}
+
+# XOR1 CY, ES:[HL].0
+:XOR1 CY,ESAddrHL_Bit0 is byte1=0x11; byte2=0x71; byte3=0x87; ESAddrHL_Bit0 & CY {}
+
+# XOR1 CY, ES:[HL].1
+:XOR1 CY,ESAddrHL_Bit1 is byte1=0x11; byte2=0x71; byte3=0x97; ESAddrHL_Bit1 & CY {}
+
+# XOR1 CY, ES:[HL].2
+:XOR1 CY,ESAddrHL_Bit2 is byte1=0x11; byte2=0x71; byte3=0xA7; ESAddrHL_Bit2 & CY {}
+
+# XOR1 CY, ES:[HL].3
+:XOR1 CY,ESAddrHL_Bit3 is byte1=0x11; byte2=0x71; byte3=0xB7; ESAddrHL_Bit3 & CY {}
+
+# XOR1 CY, ES:[HL].4
+:XOR1 CY,ESAddrHL_Bit4 is byte1=0x11; byte2=0x71; byte3=0xC7; ESAddrHL_Bit4 & CY {}
+
+# XOR1 CY, ES:[HL].5
+:XOR1 CY,ESAddrHL_Bit5 is byte1=0x11; byte2=0x71; byte3=0xD7; ESAddrHL_Bit5 & CY {}
+
+# XOR1 CY, ES:[HL].6
+:XOR1 CY,ESAddrHL_Bit6 is byte1=0x11; byte2=0x71; byte3=0xE7; ESAddrHL_Bit6 & CY {}
+
+# XOR1 CY, ES:[HL].7
+:XOR1 CY,ESAddrHL_Bit7 is byte1=0x11; byte2=0x71; byte3=0xF7; ESAddrHL_Bit7 & CY {}
+
+# SET1 saddr.0
+:SET1 ShortAddr_Bit0 is byte1=0x71; byte2=0x02; ShortAddr_Bit0 {}
+
+# SET1 saddr.1
+:SET1 ShortAddr_Bit1 is byte1=0x71; byte2=0x12; ShortAddr_Bit1 {}
+
+# SET1 saddr.2
+:SET1 ShortAddr_Bit2 is byte1=0x71; byte2=0x22; ShortAddr_Bit2 {}
+
+# SET1 saddr.3
+:SET1 ShortAddr_Bit3 is byte1=0x71; byte2=0x32; ShortAddr_Bit3 {}
+
+# SET1 saddr.4
+:SET1 ShortAddr_Bit4 is byte1=0x71; byte2=0x42; ShortAddr_Bit4 {}
+
+# SET1 saddr.5
+:SET1 ShortAddr_Bit5 is byte1=0x71; byte2=0x52; ShortAddr_Bit5 {}
+
+# SET1 saddr.6
+:SET1 ShortAddr_Bit6 is byte1=0x71; byte2=0x62; ShortAddr_Bit6 {}
+
+# SET1 saddr.7
+:SET1 ShortAddr_Bit7 is byte1=0x71; byte2=0x72; ShortAddr_Bit7 {}
+
+# SET1 sfr.0
+:SET1 Sfr_Bit0 is byte1=0x71; byte2=0x0A; Sfr_Bit0 {}
+
+# SET1 sfr.1
+:SET1 Sfr_Bit1 is byte1=0x71; byte2=0x1A; Sfr_Bit1 {}
+
+# SET1 sfr.2
+:SET1 Sfr_Bit2 is byte1=0x71; byte2=0x2A; Sfr_Bit2 {}
+
+# SET1 sfr.3
+:SET1 Sfr_Bit3 is byte1=0x71; byte2=0x3A; Sfr_Bit3 {}
+
+# SET1 sfr.4
+:SET1 Sfr_Bit4 is byte1=0x71; byte2=0x4A; Sfr_Bit4 {}
+
+# SET1 sfr.5
+:SET1 Sfr_Bit5 is byte1=0x71; byte2=0x5A; Sfr_Bit5 {}
+
+# SET1 sfr.6
+:SET1 Sfr_Bit6 is byte1=0x71; byte2=0x6A; Sfr_Bit6 {}
+
+# SET1 sfr.7
+:SET1 Sfr_Bit7 is byte1=0x71; byte2=0x7A; Sfr_Bit7 {}
+
+# SET1 A.0
+:SET1 A_Bit0 is byte1=0x71; byte2=0x8A & A_Bit0 {}
+
+# SET1 A.1
+:SET1 A_Bit1 is byte1=0x71; byte2=0x9A & A_Bit1 {}
+
+# SET1 A.2
+:SET1 A_Bit2 is byte1=0x71; byte2=0xAA & A_Bit2 {}
+
+# SET1 A.3
+:SET1 A_Bit3 is byte1=0x71; byte2=0xBA & A_Bit3 {}
+
+# SET1 A.4
+:SET1 A_Bit4 is byte1=0x71; byte2=0xCA & A_Bit4 {}
+
+# SET1 A.5
+:SET1 A_Bit5 is byte1=0x71; byte2=0xDA & A_Bit5 {}
+
+# SET1 A.6
+:SET1 A_Bit6 is byte1=0x71; byte2=0xEA & A_Bit6 {}
+
+# SET1 A.7
+:SET1 A_Bit7 is byte1=0x71; byte2=0xFA & A_Bit7 {}
+
+# SET1 !addr16.0
+:SET1 AbsAddr16_Bit0 is byte1=0x71; byte2=0x00; AbsAddr16_Bit0 {}
+
+# SET1 !addr16.1
+:SET1 AbsAddr16_Bit1 is byte1=0x71; byte2=0x10; AbsAddr16_Bit1 {}
+
+# SET1 !addr16.2
+:SET1 AbsAddr16_Bit2 is byte1=0x71; byte2=0x20; AbsAddr16_Bit2 {}
+
+# SET1 !addr16.3
+:SET1 AbsAddr16_Bit3 is byte1=0x71; byte2=0x30; AbsAddr16_Bit3 {}
+
+# SET1 !addr16.4
+:SET1 AbsAddr16_Bit4 is byte1=0x71; byte2=0x40; AbsAddr16_Bit4 {}
+
+# SET1 !addr16.5
+:SET1 AbsAddr16_Bit5 is byte1=0x71; byte2=0x50; AbsAddr16_Bit5 {}
+
+# SET1 !addr16.6
+:SET1 AbsAddr16_Bit6 is byte1=0x71; byte2=0x60; AbsAddr16_Bit6 {}
+
+# SET1 !addr16.7
+:SET1 AbsAddr16_Bit7 is byte1=0x71; byte2=0x70; AbsAddr16_Bit7 {}
+
+# SET1 PSW.0
+:SET1 PSW_Bit0 is byte1=0x71; byte2=0x0A; byte3=0xFA & PSW_Bit0 {}
+
+# SET1 PSW.1
+:SET1 PSW_Bit1 is byte1=0x71; byte2=0x1A; byte3=0xFA & PSW_Bit1 {}
+
+# SET1 PSW.2
+:SET1 PSW_Bit2 is byte1=0x71; byte2=0x2A; byte3=0xFA & PSW_Bit2 {}
+
+# SET1 PSW.3
+:SET1 PSW_Bit3 is byte1=0x71; byte2=0x3A; byte3=0xFA & PSW_Bit3 {}
+
+# SET1 PSW.4
+:SET1 PSW_Bit4 is byte1=0x71; byte2=0x4A; byte3=0xFA & PSW_Bit4 {}
+
+# SET1 PSW.5
+:SET1 PSW_Bit5 is byte1=0x71; byte2=0x5A; byte3=0xFA & PSW_Bit5 {}
+
+# SET1 PSW.6
+:SET1 PSW_Bit6 is byte1=0x71; byte2=0x6A; byte3=0xFA & PSW_Bit6 {}
+
+# SET1 PSW.7
+:SET1 PSW_Bit7 is byte1=0x71; byte2=0x7A; byte3=0xFA & PSW_Bit7 {}
+
+# SET1 [HL].0
+:SET1 AddrHL_Bit0 is byte1=0x71; byte2=0x82; AddrHL_Bit0 {}
+
+# SET1 [HL].1
+:SET1 AddrHL_Bit1 is byte1=0x71; byte2=0x92; AddrHL_Bit1 {}
+
+# SET1 [HL].2
+:SET1 AddrHL_Bit2 is byte1=0x71; byte2=0xA2; AddrHL_Bit2 {}
+
+# SET1 [HL].3
+:SET1 AddrHL_Bit3 is byte1=0x71; byte2=0xB2; AddrHL_Bit3 {}
+
+# SET1 [HL].4
+:SET1 AddrHL_Bit4 is byte1=0x71; byte2=0xC2; AddrHL_Bit4 {}
+
+# SET1 [HL].5
+:SET1 AddrHL_Bit5 is byte1=0x71; byte2=0xD2; AddrHL_Bit5 {}
+
+# SET1 [HL].6
+:SET1 AddrHL_Bit6 is byte1=0x71; byte2=0xE2; AddrHL_Bit6 {}
+
+# SET1 [HL].7
+:SET1 AddrHL_Bit7 is byte1=0x71; byte2=0xF2; AddrHL_Bit7 {}
+
+# SET1 ES:!addr16.0
+:SET1 ESAbsAddr16_Bit0 is byte1=0x11; byte2=0x71; byte3=0x00; ESAbsAddr16_Bit0 {}
+
+# SET1 ES:!addr16.1
+:SET1 ESAbsAddr16_Bit1 is byte1=0x11; byte2=0x71; byte3=0x10; ESAbsAddr16_Bit1 {}
+
+# SET1 ES:!addr16.2
+:SET1 ESAbsAddr16_Bit2 is byte1=0x11; byte2=0x71; byte3=0x20; ESAbsAddr16_Bit2 {}
+
+# SET1 ES:!addr16.3
+:SET1 ESAbsAddr16_Bit3 is byte1=0x11; byte2=0x71; byte3=0x30; ESAbsAddr16_Bit3 {}
+
+# SET1 ES:!addr16.4
+:SET1 ESAbsAddr16_Bit4 is byte1=0x11; byte2=0x71; byte3=0x40; ESAbsAddr16_Bit4 {}
+
+# SET1 ES:!addr16.5
+:SET1 ESAbsAddr16_Bit5 is byte1=0x11; byte2=0x71; byte3=0x50; ESAbsAddr16_Bit5 {}
+
+# SET1 ES:!addr16.6
+:SET1 ESAbsAddr16_Bit6 is byte1=0x11; byte2=0x71; byte3=0x60; ESAbsAddr16_Bit6 {}
+
+# SET1 ES:!addr16.7
+:SET1 ESAbsAddr16_Bit7 is byte1=0x11; byte2=0x71; byte3=0x70; ESAbsAddr16_Bit7 {}
+
+# SET1 ES:[HL].0
+:SET1 ESAddrHL_Bit0 is byte1=0x11; byte2=0x71; byte3=0x82; ESAddrHL_Bit0 {}
+
+# SET1 ES:[HL].1
+:SET1 ESAddrHL_Bit1 is byte1=0x11; byte2=0x71; byte3=0x92; ESAddrHL_Bit1 {}
+
+# SET1 ES:[HL].2
+:SET1 ESAddrHL_Bit2 is byte1=0x11; byte2=0x71; byte3=0xA2; ESAddrHL_Bit2 {}
+
+# SET1 ES:[HL].3
+:SET1 ESAddrHL_Bit3 is byte1=0x11; byte2=0x71; byte3=0xB2; ESAddrHL_Bit3 {}
+
+# SET1 ES:[HL].4
+:SET1 ESAddrHL_Bit4 is byte1=0x11; byte2=0x71; byte3=0xC2; ESAddrHL_Bit4 {}
+
+# SET1 ES:[HL].5
+:SET1 ESAddrHL_Bit5 is byte1=0x11; byte2=0x71; byte3=0xD2; ESAddrHL_Bit5 {}
+
+# SET1 ES:[HL].6
+:SET1 ESAddrHL_Bit6 is byte1=0x11; byte2=0x71; byte3=0xE2; ESAddrHL_Bit6 {}
+
+# SET1 ES:[HL].7
+:SET1 ESAddrHL_Bit7 is byte1=0x11; byte2=0x71; byte3=0xF2; ESAddrHL_Bit7 {}
+
+# CLR1 saddr.0
+:CLR1 ShortAddr_Bit0 is byte1=0x71; byte2=0x03; ShortAddr_Bit0 {}
+
+# CLR1 saddr.1
+:CLR1 ShortAddr_Bit1 is byte1=0x71; byte2=0x13; ShortAddr_Bit1 {}
+
+# CLR1 saddr.2
+:CLR1 ShortAddr_Bit2 is byte1=0x71; byte2=0x23; ShortAddr_Bit2 {}
+
+# CLR1 saddr.3
+:CLR1 ShortAddr_Bit3 is byte1=0x71; byte2=0x33; ShortAddr_Bit3 {}
+
+# CLR1 saddr.4
+:CLR1 ShortAddr_Bit4 is byte1=0x71; byte2=0x43; ShortAddr_Bit4 {}
+
+# CLR1 saddr.5
+:CLR1 ShortAddr_Bit5 is byte1=0x71; byte2=0x53; ShortAddr_Bit5 {}
+
+# CLR1 saddr.6
+:CLR1 ShortAddr_Bit6 is byte1=0x71; byte2=0x63; ShortAddr_Bit6 {}
+
+# CLR1 saddr.7
+:CLR1 ShortAddr_Bit7 is byte1=0x71; byte2=0x73; ShortAddr_Bit7 {}
+
+# CLR1 sfr.0
+:CLR1 Sfr_Bit0 is byte1=0x71; byte2=0x0B; Sfr_Bit0 {}
+
+# CLR1 sfr.1
+:CLR1 Sfr_Bit1 is byte1=0x71; byte2=0x1B; Sfr_Bit1 {}
+
+# CLR1 sfr.2
+:CLR1 Sfr_Bit2 is byte1=0x71; byte2=0x2B; Sfr_Bit2 {}
+
+# CLR1 sfr.3
+:CLR1 Sfr_Bit3 is byte1=0x71; byte2=0x3B; Sfr_Bit3 {}
+
+# CLR1 sfr.4
+:CLR1 Sfr_Bit4 is byte1=0x71; byte2=0x4B; Sfr_Bit4 {}
+
+# CLR1 sfr.5
+:CLR1 Sfr_Bit5 is byte1=0x71; byte2=0x5B; Sfr_Bit5 {}
+
+# CLR1 sfr.6
+:CLR1 Sfr_Bit6 is byte1=0x71; byte2=0x6B; Sfr_Bit6 {}
+
+# CLR1 sfr.7
+:CLR1 Sfr_Bit7 is byte1=0x71; byte2=0x7B; Sfr_Bit7 {}
+
+# CLR1 A.0
+:CLR1 A_Bit0 is byte1=0x71; byte2=0x8B & A_Bit0 {}
+
+# CLR1 A.1
+:CLR1 A_Bit1 is byte1=0x71; byte2=0x9B & A_Bit1 {}
+
+# CLR1 A.2
+:CLR1 A_Bit2 is byte1=0x71; byte2=0xAB & A_Bit2 {}
+
+# CLR1 A.3
+:CLR1 A_Bit3 is byte1=0x71; byte2=0xBB & A_Bit3 {}
+
+# CLR1 A.4
+:CLR1 A_Bit4 is byte1=0x71; byte2=0xCB & A_Bit4 {}
+
+# CLR1 A.5
+:CLR1 A_Bit5 is byte1=0x71; byte2=0xDB & A_Bit5 {}
+
+# CLR1 A.6
+:CLR1 A_Bit6 is byte1=0x71; byte2=0xEB & A_Bit6 {}
+
+# CLR1 A.7
+:CLR1 A_Bit7 is byte1=0x71; byte2=0xFB & A_Bit7 {}
+
+# CLR1 !addr16.0
+:CLR1 AbsAddr16_Bit0 is byte1=0x71; byte2=0x08; AbsAddr16_Bit0 {}
+
+# CLR1 !addr16.1
+:CLR1 AbsAddr16_Bit1 is byte1=0x71; byte2=0x18; AbsAddr16_Bit1 {}
+
+# CLR1 !addr16.2
+:CLR1 AbsAddr16_Bit2 is byte1=0x71; byte2=0x28; AbsAddr16_Bit2 {}
+
+# CLR1 !addr16.3
+:CLR1 AbsAddr16_Bit3 is byte1=0x71; byte2=0x38; AbsAddr16_Bit3 {}
+
+# CLR1 !addr16.4
+:CLR1 AbsAddr16_Bit4 is byte1=0x71; byte2=0x48; AbsAddr16_Bit4 {}
+
+# CLR1 !addr16.5
+:CLR1 AbsAddr16_Bit5 is byte1=0x71; byte2=0x58; AbsAddr16_Bit5 {}
+
+# CLR1 !addr16.6
+:CLR1 AbsAddr16_Bit6 is byte1=0x71; byte2=0x68; AbsAddr16_Bit6 {}
+
+# CLR1 !addr16.7
+:CLR1 AbsAddr16_Bit7 is byte1=0x71; byte2=0x78; AbsAddr16_Bit7 {}
+
+# CLR1 PSW.0
+:CLR1 PSW_Bit0 is byte1=0x71; byte2=0x0B; byte3=0xFA & PSW_Bit0 {}
+
+# CLR1 PSW.1
+:CLR1 PSW_Bit1 is byte1=0x71; byte2=0x1B; byte3=0xFA & PSW_Bit1 {}
+
+# CLR1 PSW.2
+:CLR1 PSW_Bit2 is byte1=0x71; byte2=0x2B; byte3=0xFA & PSW_Bit2 {}
+
+# CLR1 PSW.3
+:CLR1 PSW_Bit3 is byte1=0x71; byte2=0x3B; byte3=0xFA & PSW_Bit3 {}
+
+# CLR1 PSW.4
+:CLR1 PSW_Bit4 is byte1=0x71; byte2=0x4B; byte3=0xFA & PSW_Bit4 {}
+
+# CLR1 PSW.5
+:CLR1 PSW_Bit5 is byte1=0x71; byte2=0x5B; byte3=0xFA & PSW_Bit5 {}
+
+# CLR1 PSW.6
+:CLR1 PSW_Bit6 is byte1=0x71; byte2=0x6B; byte3=0xFA & PSW_Bit6 {}
+
+# CLR1 PSW.7
+:CLR1 PSW_Bit7 is byte1=0x71; byte2=0x7B; byte3=0xFA & PSW_Bit7 {}
+
+# CLR1 [HL].0
+:CLR1 AddrHL_Bit0 is byte1=0x71; byte2=0x83; AddrHL_Bit0 {}
+
+# CLR1 [HL].1
+:CLR1 AddrHL_Bit1 is byte1=0x71; byte2=0x93; AddrHL_Bit1 {}
+
+# CLR1 [HL].2
+:CLR1 AddrHL_Bit2 is byte1=0x71; byte2=0xA3; AddrHL_Bit2 {}
+
+# CLR1 [HL].3
+:CLR1 AddrHL_Bit3 is byte1=0x71; byte2=0xB3; AddrHL_Bit3 {}
+
+# CLR1 [HL].4
+:CLR1 AddrHL_Bit4 is byte1=0x71; byte2=0xC3; AddrHL_Bit4 {}
+
+# CLR1 [HL].5
+:CLR1 AddrHL_Bit5 is byte1=0x71; byte2=0xD3; AddrHL_Bit5 {}
+
+# CLR1 [HL].6
+:CLR1 AddrHL_Bit6 is byte1=0x71; byte2=0xE3; AddrHL_Bit6 {}
+
+# CLR1 [HL].7
+:CLR1 AddrHL_Bit7 is byte1=0x71; byte2=0xF3; AddrHL_Bit7 {}
+
+# CLR1 ES:!addr16.0
+:CLR1 ESAbsAddr16_Bit0 is byte1=0x11; byte2=0x71; byte3=0x08; ESAbsAddr16_Bit0 {}
+
+# CLR1 ES:!addr16.1
+:CLR1 ESAbsAddr16_Bit1 is byte1=0x11; byte2=0x71; byte3=0x18; ESAbsAddr16_Bit1 {}
+
+# CLR1 ES:!addr16.2
+:CLR1 ESAbsAddr16_Bit2 is byte1=0x11; byte2=0x71; byte3=0x28; ESAbsAddr16_Bit2 {}
+
+# CLR1 ES:!addr16.3
+:CLR1 ESAbsAddr16_Bit3 is byte1=0x11; byte2=0x71; byte3=0x38; ESAbsAddr16_Bit3 {}
+
+# CLR1 ES:!addr16.4
+:CLR1 ESAbsAddr16_Bit4 is byte1=0x11; byte2=0x71; byte3=0x48; ESAbsAddr16_Bit4 {}
+
+# CLR1 ES:!addr16.5
+:CLR1 ESAbsAddr16_Bit5 is byte1=0x11; byte2=0x71; byte3=0x58; ESAbsAddr16_Bit5 {}
+
+# CLR1 ES:!addr16.6
+:CLR1 ESAbsAddr16_Bit6 is byte1=0x11; byte2=0x71; byte3=0x68; ESAbsAddr16_Bit6 {}
+
+# CLR1 ES:!addr16.7
+:CLR1 ESAbsAddr16_Bit7 is byte1=0x11; byte2=0x71; byte3=0x78; ESAbsAddr16_Bit7 {}
+
+# CLR1 ES:[HL].0
+:CLR1 ESAddrHL_Bit0 is byte1=0x11; byte2=0x71; byte3=0x83; ESAddrHL_Bit0 {}
+
+# CLR1 ES:[HL].1
+:CLR1 ESAddrHL_Bit1 is byte1=0x11; byte2=0x71; byte3=0x93; ESAddrHL_Bit1 {}
+
+# CLR1 ES:[HL].2
+:CLR1 ESAddrHL_Bit2 is byte1=0x11; byte2=0x71; byte3=0xA3; ESAddrHL_Bit2 {}
+
+# CLR1 ES:[HL].3
+:CLR1 ESAddrHL_Bit3 is byte1=0x11; byte2=0x71; byte3=0xB3; ESAddrHL_Bit3 {}
+
+# CLR1 ES:[HL].4
+:CLR1 ESAddrHL_Bit4 is byte1=0x11; byte2=0x71; byte3=0xC3; ESAddrHL_Bit4 {}
+
+# CLR1 ES:[HL].5
+:CLR1 ESAddrHL_Bit5 is byte1=0x11; byte2=0x71; byte3=0xD3; ESAddrHL_Bit5 {}
+
+# CLR1 ES:[HL].6
+:CLR1 ESAddrHL_Bit6 is byte1=0x11; byte2=0x71; byte3=0xE3; ESAddrHL_Bit6 {}
+
+# CLR1 ES:[HL].7
+:CLR1 ESAddrHL_Bit7 is byte1=0x11; byte2=0x71; byte3=0xF3; ESAddrHL_Bit7 {}
+
+# SET1 CY
+:SET1 CY is byte1=0x71; byte2=0x80 & CY {}
+
+# CLR1 CY
+:CLR1 CY is byte1=0x71; byte2=0x88 & CY {}
+
+# NOT1 CY
+:NOT1 CY is byte1=0x71; byte2=0xC0 & CY {}
+
+###################################
+#
+## Call Return Instructions
+#
+###################################
+
+# CALL AX
+:CALL AX is byte1=0x61; byte2=0xCA & AX { call [AX]; }
+
+# CALL BC
+:CALL BC is byte1=0x61; byte2=0xDA & BC { call [BC]; }
+
+# CALL DE
+:CALL DE is byte1=0x61; byte2=0xEA & DE { call [DE]; }
+
+# CALL HL
+:CALL HL is byte1=0x61; byte2=0xFA & HL { call [HL]; }
+
+# CALL $!addr20
+:CALL RelAddr16 is byte1=0xFE; RelAddr16 { call RelAddr16; }
+
+# CALL !addr16
+:CALL JmpAbsAddr16 is byte1=0xFD; JmpAbsAddr16 { call JmpAbsAddr16; }
+
+# CALL !!addr20
+:CALL JmpAbsAddr20 is byte1=0xFC; JmpAbsAddr20 { SP = SP - 4; call JmpAbsAddr20; }
+
+# CALLT [0080h]
+:CALLT TableAddr0080 is byte1=0x61; byte2=0x84; TableAddr0080 {}
+
+# CALLT [0082h]
+:CALLT TableAddr0082 is byte1=0x61; byte2=0x94; TableAddr0082 {}
+
+# CALLT [0084h]
+:CALLT TableAddr0084 is byte1=0x61; byte2=0xA4; TableAddr0084 {}
+
+# CALLT [0086h]
+:CALLT TableAddr0086 is byte1=0x61; byte2=0xB4; TableAddr0086 {}
+
+# CALLT [0088h]
+:CALLT TableAddr0088 is byte1=0x61; byte2=0xC4; TableAddr0088 {}
+
+# CALLT [008Ah]
+:CALLT TableAddr008A is byte1=0x61; byte2=0xD4; TableAddr008A {}
+
+# CALLT [008Ch]
+:CALLT TableAddr008C is byte1=0x61; byte2=0xE4; TableAddr008C {}
+
+# CALLT [008Eh]
+:CALLT TableAddr008E is byte1=0x61; byte2=0xF4; TableAddr008E {}
+
+# CALLT [0090h]
+:CALLT TableAddr0090 is byte1=0x61; byte2=0x85; TableAddr0090 {}
+
+# CALLT [0092h]
+:CALLT TableAddr0092 is byte1=0x61; byte2=0x95; TableAddr0092 {}
+
+# CALLT [0094h]
+:CALLT TableAddr0094 is byte1=0x61; byte2=0xA5; TableAddr0094 {}
+
+# CALLT [0096h]
+:CALLT TableAddr0096 is byte1=0x61; byte2=0xB5; TableAddr0096 {}
+
+# CALLT [0098h]
+:CALLT TableAddr0098 is byte1=0x61; byte2=0xC5; TableAddr0098 {}
+
+# CALLT [009Ah]
+:CALLT TableAddr009A is byte1=0x61; byte2=0xD5; TableAddr009A {}
+
+# CALLT [009Ch]
+:CALLT TableAddr009C is byte1=0x61; byte2=0xE5; TableAddr009C {}
+
+# CALLT [009Eh]
+:CALLT TableAddr009E is byte1=0x61; byte2=0xF5; TableAddr009E {}
+
+# CALLT [00A0h]
+:CALLT TableAddr00A0 is byte1=0x61; byte2=0x86; TableAddr00A0 {}
+
+# CALLT [00A2h]
+:CALLT TableAddr00A2 is byte1=0x61; byte2=0x96; TableAddr00A2 {}
+
+# CALLT [00A4h]
+:CALLT TableAddr00A4 is byte1=0x61; byte2=0xA6; TableAddr00A4 {}
+
+# CALLT [00A6h]
+:CALLT TableAddr00A6 is byte1=0x61; byte2=0xB6; TableAddr00A6 {}
+
+# CALLT [00A8h]
+:CALLT TableAddr00A8 is byte1=0x61; byte2=0xC6; TableAddr00A8 {}
+
+# CALLT [00AAh]
+:CALLT TableAddr00AA is byte1=0x61; byte2=0xD6; TableAddr00AA {}
+
+# CALLT [00ACh]
+:CALLT TableAddr00AC is byte1=0x61; byte2=0xE6; TableAddr00AC {}
+
+# CALLT [00AEh]
+:CALLT TableAddr00AE is byte1=0x61; byte2=0xF6; TableAddr00AE {}
+
+# CALLT [00B0h]
+:CALLT TableAddr00B0 is byte1=0x61; byte2=0x87; TableAddr00B0 {}
+
+# CALLT [00B2h]
+:CALLT TableAddr00B2 is byte1=0x61; byte2=0x97; TableAddr00B2 {}
+
+# CALLT [00B4h]
+:CALLT TableAddr00B4 is byte1=0x61; byte2=0xA7; TableAddr00B4 {}
+
+# CALLT [00B6h]
+:CALLT TableAddr00B6 is byte1=0x61; byte2=0xB7; TableAddr00B6 {}
+
+# CALLT [00B8h]
+:CALLT TableAddr00B8 is byte1=0x61; byte2=0xC7; TableAddr00B8 {}
+
+# CALLT [00BAh]
+:CALLT TableAddr00BA is byte1=0x61; byte2=0xD7; TableAddr00BA {}
+
+# CALLT [00BCh]
+:CALLT TableAddr00BC is byte1=0x61; byte2=0xE7; TableAddr00BC {}
+
+# CALLT [00BEh]
+:CALLT TableAddr00BE is byte1=0x61; byte2=0xF7; TableAddr00BE {}
+
+# BRK 
+:BRK  is byte1=0x61; byte2=0xCC {}
+
+# RET 
+:RET  is byte1=0xD7 { ip:4=0; pop4(ip); return [ip]; }
+
+# RETI 
+:RETI  is byte1=0x61; byte2=0xFC {}
+
+# RETB 
+:RETB  is byte1=0x61; byte2=0xEC {}
+
+###################################
+#
+## Stack Manipulation Instructions
+#
+###################################
+
+# PUSH PSW
+:PUSH PSW is byte1=0x61; byte2=0xDD & PSW { pushWord(PSW); }
+
+# PUSH AX
+:PUSH AX is byte1=0xC1 & AX { pushWord(AX); }
+
+# PUSH BC
+:PUSH BC is byte1=0xC3 & BC { pushWord(BC); }
+
+# PUSH DE
+:PUSH DE is byte1=0xC5 & DE { pushWord(DE); }
+
+# PUSH HL
+:PUSH HL is byte1=0xC7 & HL { pushWord(DE); }
+
+# POP PSW
+:POP PSW is byte1=0x61; byte2=0xCD & PSW { popWord(PSW); }
+
+# POP AX
+:POP AX is byte1=0xC0 & AX { popWord(AX); }
+
+# POP BC
+:POP BC is byte1=0xC2 & BC { popWord(BC); }
+
+# POP DE
+:POP DE is byte1=0xC4 & DE { popWord(DE); }
+
+# POP HL
+:POP HL is byte1=0xC6 & HL { popWord(HL); }
+
+# MOVW SP, #word
+:MOVW SP,ImmWord is byte1=0xCB; byte2=0xF8; ImmWord & SP { SP = ImmWord; }
+
+# MOVW SP, AX
+:MOVW SP,AX is byte1=0xBE; byte2=0xF8 & SP & AX { SP = AX; }
+
+# MOVW AX, SP
+:MOVW AX,SP is byte1=0xAE; byte2=0xF8 & AX & SP { AX = SP; }
+
+# MOVW BC, SP
+:MOVW BC,SP is byte1=0xDB & BC & SP { BC = SP; }
+
+# MOVW DE, SP
+:MOVW DE,SP is byte1=0xEB & DE & SP { DE = SP; }
+
+# MOVW HL, SP
+:MOVW HL,SP is byte1=0xFB & HL & SP { HL = SP; }
+
+# ADDW SP, #byte
+:ADDW SP,ImmByte is byte1=0x10; ImmByte & SP { SP = SP + sext(ImmByte); }
+
+# SUBW SP, #byte
+:SUBW SP,ImmByte is byte1=0x20; ImmByte & SP { SP = SP - sext(ImmByte); }
+
+###################################
+#
+## Unconditional Branch Instructions
+#
+###################################
+
+# BR AX
+:BR AX is byte1=0x61; byte2=0xCB & AX { goto [AX]; }
+
+# BR $addr20
+:BR RelAddr8 is byte1=0xEF; RelAddr8 { goto RelAddr8; }
+
+# BR $!addr20
+:BR RelAddr16 is byte1=0xEE; RelAddr16 { goto RelAddr16; }
+
+# BR !addr16
+:BR JmpAbsAddr16 is byte1=0xED; JmpAbsAddr16 { goto JmpAbsAddr16; }
+
+# BR !!addr20
+:BR JmpAbsAddr20 is byte1=0xEC; JmpAbsAddr20 { goto JmpAbsAddr20; }
+
+###################################
+#
+## Conditional Branch Instructions
+#
+###################################
+
+# BC $addr20
+:BC RelAddr8 is byte1=0xDC; RelAddr8 { if (CY) goto RelAddr8; }
+
+# BNC $addr20
+:BNC RelAddr8 is byte1=0xDE; RelAddr8 { if (!CY) goto RelAddr8; }
+
+# BZ $addr20
+:BZ RelAddr8 is byte1=0xDD; RelAddr8 { if (Z) goto RelAddr8; }
+
+# BNZ $addr20
+:BNZ RelAddr8 is byte1=0xDF; RelAddr8 { if (!Z) goto RelAddr8; }
+
+# BH $addr20
+:BH RelAddr8 is byte1=0x61; byte2=0xC3; RelAddr8 {}
+
+# BNH $addr20
+:BNH RelAddr8 is byte1=0x61; byte2=0xD3; RelAddr8 {}
+
+# BT saddr.0, $addr20
+:BT ShortAddr_Bit0,RelAddr8 is byte1=0x31; byte2=0x02; ShortAddr_Bit0; RelAddr8 {}
+
+# BT saddr.1, $addr20
+:BT ShortAddr_Bit1,RelAddr8 is byte1=0x31; byte2=0x12; ShortAddr_Bit1; RelAddr8 {}
+
+# BT saddr.2, $addr20
+:BT ShortAddr_Bit2,RelAddr8 is byte1=0x31; byte2=0x22; ShortAddr_Bit2; RelAddr8 {}
+
+# BT saddr.3, $addr20
+:BT ShortAddr_Bit3,RelAddr8 is byte1=0x31; byte2=0x32; ShortAddr_Bit3; RelAddr8 {}
+
+# BT saddr.4, $addr20
+:BT ShortAddr_Bit4,RelAddr8 is byte1=0x31; byte2=0x42; ShortAddr_Bit4; RelAddr8 {}
+
+# BT saddr.5, $addr20
+:BT ShortAddr_Bit5,RelAddr8 is byte1=0x31; byte2=0x52; ShortAddr_Bit5; RelAddr8 {}
+
+# BT saddr.6, $addr20
+:BT ShortAddr_Bit6,RelAddr8 is byte1=0x31; byte2=0x62; ShortAddr_Bit6; RelAddr8 {}
+
+# BT saddr.7, $addr20
+:BT ShortAddr_Bit7,RelAddr8 is byte1=0x31; byte2=0x72; ShortAddr_Bit7; RelAddr8 {}
+
+# BT sfr.0, $addr20
+:BT Sfr_Bit0,RelAddr8 is byte1=0x31; byte2=0x82; Sfr_Bit0; RelAddr8 {}
+
+# BT sfr.1, $addr20
+:BT Sfr_Bit1,RelAddr8 is byte1=0x31; byte2=0x92; Sfr_Bit1; RelAddr8 {}
+
+# BT sfr.2, $addr20
+:BT Sfr_Bit2,RelAddr8 is byte1=0x31; byte2=0xA2; Sfr_Bit2; RelAddr8 {}
+
+# BT sfr.3, $addr20
+:BT Sfr_Bit3,RelAddr8 is byte1=0x31; byte2=0xB2; Sfr_Bit3; RelAddr8 {}
+
+# BT sfr.4, $addr20
+:BT Sfr_Bit4,RelAddr8 is byte1=0x31; byte2=0xC2; Sfr_Bit4; RelAddr8 {}
+
+# BT sfr.5, $addr20
+:BT Sfr_Bit5,RelAddr8 is byte1=0x31; byte2=0xD2; Sfr_Bit5; RelAddr8 {}
+
+# BT sfr.6, $addr20
+:BT Sfr_Bit6,RelAddr8 is byte1=0x31; byte2=0xE2; Sfr_Bit6; RelAddr8 {}
+
+# BT sfr.7, $addr20
+:BT Sfr_Bit7,RelAddr8 is byte1=0x31; byte2=0xF2; Sfr_Bit7; RelAddr8 {}
+
+# BT A.0, $addr20
+:BT A_Bit0,RelAddr8 is byte1=0x31; byte2=0x03; RelAddr8 & A_Bit0 {}
+
+# BT A.1, $addr20
+:BT A_Bit1,RelAddr8 is byte1=0x31; byte2=0x13; RelAddr8 & A_Bit1 {}
+
+# BT A.2, $addr20
+:BT A_Bit2,RelAddr8 is byte1=0x31; byte2=0x23; RelAddr8 & A_Bit2 {}
+
+# BT A.3, $addr20
+:BT A_Bit3,RelAddr8 is byte1=0x31; byte2=0x33; RelAddr8 & A_Bit3 {}
+
+# BT A.4, $addr20
+:BT A_Bit4,RelAddr8 is byte1=0x31; byte2=0x43; RelAddr8 & A_Bit4 {}
+
+# BT A.5, $addr20
+:BT A_Bit5,RelAddr8 is byte1=0x31; byte2=0x53; RelAddr8 & A_Bit5 {}
+
+# BT A.6, $addr20
+:BT A_Bit6,RelAddr8 is byte1=0x31; byte2=0x63; RelAddr8 & A_Bit6 {}
+
+# BT A.7, $addr20
+:BT A_Bit7,RelAddr8 is byte1=0x31; byte2=0x73; RelAddr8 & A_Bit7 {}
+
+# BT PSW.0, $addr20
+:BT PSW_Bit0,RelAddr8 is byte1=0x31; byte2=0x82; byte3=0xFA; RelAddr8 & PSW_Bit0 {}
+
+# BT PSW.1, $addr20
+:BT PSW_Bit1,RelAddr8 is byte1=0x31; byte2=0x92; byte3=0xFA; RelAddr8 & PSW_Bit1 {}
+
+# BT PSW.2, $addr20
+:BT PSW_Bit2,RelAddr8 is byte1=0x31; byte2=0xA2; byte3=0xFA; RelAddr8 & PSW_Bit2 {}
+
+# BT PSW.3, $addr20
+:BT PSW_Bit3,RelAddr8 is byte1=0x31; byte2=0xB2; byte3=0xFA; RelAddr8 & PSW_Bit3 {}
+
+# BT PSW.4, $addr20
+:BT PSW_Bit4,RelAddr8 is byte1=0x31; byte2=0xC2; byte3=0xFA; RelAddr8 & PSW_Bit4 {}
+
+# BT PSW.5, $addr20
+:BT PSW_Bit5,RelAddr8 is byte1=0x31; byte2=0xD2; byte3=0xFA; RelAddr8 & PSW_Bit5 {}
+
+# BT PSW.6, $addr20
+:BT PSW_Bit6,RelAddr8 is byte1=0x31; byte2=0xE2; byte3=0xFA; RelAddr8 & PSW_Bit6 {}
+
+# BT PSW.7, $addr20
+:BT PSW_Bit7,RelAddr8 is byte1=0x31; byte2=0xF2; byte3=0xFA; RelAddr8 & PSW_Bit7 {}
+
+# BT [HL].0, $addr20
+:BT AddrHL_Bit0,RelAddr8 is byte1=0x31; byte2=0x83; AddrHL_Bit0; RelAddr8 {}
+
+# BT [HL].1, $addr20
+:BT AddrHL_Bit1,RelAddr8 is byte1=0x31; byte2=0x93; AddrHL_Bit1; RelAddr8 {}
+
+# BT [HL].2, $addr20
+:BT AddrHL_Bit2,RelAddr8 is byte1=0x31; byte2=0xA3; AddrHL_Bit2; RelAddr8 {}
+
+# BT [HL].3, $addr20
+:BT AddrHL_Bit3,RelAddr8 is byte1=0x31; byte2=0xB3; AddrHL_Bit3; RelAddr8 {}
+
+# BT [HL].4, $addr20
+:BT AddrHL_Bit4,RelAddr8 is byte1=0x31; byte2=0xC3; AddrHL_Bit4; RelAddr8 {}
+
+# BT [HL].5, $addr20
+:BT AddrHL_Bit5,RelAddr8 is byte1=0x31; byte2=0xD3; AddrHL_Bit5; RelAddr8 {}
+
+# BT [HL].6, $addr20
+:BT AddrHL_Bit6,RelAddr8 is byte1=0x31; byte2=0xE3; AddrHL_Bit6; RelAddr8 {}
+
+# BT [HL].7, $addr20
+:BT AddrHL_Bit7,RelAddr8 is byte1=0x31; byte2=0xF3; AddrHL_Bit7; RelAddr8 {}
+
+# BT ES:[HL].0, $addr20
+:BT ESAddrHL_Bit0,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0x83; ESAddrHL_Bit0; RelAddr8 {}
+
+# BT ES:[HL].1, $addr20
+:BT ESAddrHL_Bit1,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0x93; ESAddrHL_Bit1; RelAddr8 {}
+
+# BT ES:[HL].2, $addr20
+:BT ESAddrHL_Bit2,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xA3; ESAddrHL_Bit2; RelAddr8 {}
+
+# BT ES:[HL].3, $addr20
+:BT ESAddrHL_Bit3,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xB3; ESAddrHL_Bit3; RelAddr8 {}
+
+# BT ES:[HL].4, $addr20
+:BT ESAddrHL_Bit4,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xC3; ESAddrHL_Bit4; RelAddr8 {}
+
+# BT ES:[HL].5, $addr20
+:BT ESAddrHL_Bit5,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xD3; ESAddrHL_Bit5; RelAddr8 {}
+
+# BT ES:[HL].6, $addr20
+:BT ESAddrHL_Bit6,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xE3; ESAddrHL_Bit6; RelAddr8 {}
+
+# BT ES:[HL].7, $addr20
+:BT ESAddrHL_Bit7,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xF3; ESAddrHL_Bit7; RelAddr8 {}
+
+# BF saddr.0, $addr20
+:BF ShortAddr_Bit0,RelAddr8 is byte1=0x31; byte2=0x04; ShortAddr_Bit0; RelAddr8 {}
+
+# BF saddr.1, $addr20
+:BF ShortAddr_Bit1,RelAddr8 is byte1=0x31; byte2=0x14; ShortAddr_Bit1; RelAddr8 {}
+
+# BF saddr.2, $addr20
+:BF ShortAddr_Bit2,RelAddr8 is byte1=0x31; byte2=0x24; ShortAddr_Bit2; RelAddr8 {}
+
+# BF saddr.3, $addr20
+:BF ShortAddr_Bit3,RelAddr8 is byte1=0x31; byte2=0x34; ShortAddr_Bit3; RelAddr8 {}
+
+# BF saddr.4, $addr20
+:BF ShortAddr_Bit4,RelAddr8 is byte1=0x31; byte2=0x44; ShortAddr_Bit4; RelAddr8 {}
+
+# BF saddr.5, $addr20
+:BF ShortAddr_Bit5,RelAddr8 is byte1=0x31; byte2=0x54; ShortAddr_Bit5; RelAddr8 {}
+
+# BF saddr.6, $addr20
+:BF ShortAddr_Bit6,RelAddr8 is byte1=0x31; byte2=0x64; ShortAddr_Bit6; RelAddr8 {}
+
+# BF saddr.7,$addr20
+:BF ShortAddr_Bit7,RelAddr8 is byte1=0x31; byte2=0x74; ShortAddr_Bit7; RelAddr8 {}
+
+# BF sfr.0, $addr20
+:BF Sfr_Bit0,RelAddr8 is byte1=0x31; byte2=0x84; Sfr_Bit0; RelAddr8 {}
+
+# BF sfr.1, $addr20
+:BF Sfr_Bit1,RelAddr8 is byte1=0x31; byte2=0x94; Sfr_Bit1; RelAddr8 {}
+
+# BF sfr.2, $addr20
+:BF Sfr_Bit2,RelAddr8 is byte1=0x31; byte2=0xA4; Sfr_Bit2; RelAddr8 {}
+
+# BF sfr.3,$addr20
+:BF Sfr_Bit3,RelAddr8 is byte1=0x31; byte2=0xB4; Sfr_Bit3; RelAddr8 {}
+
+# BF sfr.4, $addr20
+:BF Sfr_Bit4,RelAddr8 is byte1=0x31; byte2=0xC4; Sfr_Bit4; RelAddr8 {}
+
+# BF sfr.5, $addr20
+:BF Sfr_Bit5,RelAddr8 is byte1=0x31; byte2=0xD4; Sfr_Bit5; RelAddr8 {}
+
+# BF sfr.6,$addr20
+:BF Sfr_Bit6,RelAddr8 is byte1=0x31; byte2=0xE4; Sfr_Bit6; RelAddr8 {}
+
+# BF sfr.7, $addr20
+:BF Sfr_Bit7,RelAddr8 is byte1=0x31; byte2=0xF4; Sfr_Bit7; RelAddr8 {}
+
+# BF A.0, $addr20
+:BF A_Bit0,RelAddr8 is byte1=0x31; byte2=0x05; RelAddr8 & A_Bit0 {}
+
+# BF A.1, $addr20
+:BF A_Bit1,RelAddr8 is byte1=0x31; byte2=0x15; RelAddr8 & A_Bit1 {}
+
+# BF A.2, $addr20
+:BF A_Bit2,RelAddr8 is byte1=0x31; byte2=0x25; RelAddr8 & A_Bit2 {}
+
+# BF A.3, $addr20
+:BF A_Bit3,RelAddr8 is byte1=0x31; byte2=0x35; RelAddr8 & A_Bit3 {}
+
+# BF A.4, $addr20
+:BF A_Bit4,RelAddr8 is byte1=0x31; byte2=0x45; RelAddr8 & A_Bit4 {}
+
+# BF A.5, $addr20
+:BF A_Bit5,RelAddr8 is byte1=0x31; byte2=0x55; RelAddr8 & A_Bit5 {}
+
+# BF A.6, $addr20
+:BF A_Bit6,RelAddr8 is byte1=0x31; byte2=0x65; RelAddr8 & A_Bit6 {}
+
+# BF A.7, $addr20
+:BF A_Bit7,RelAddr8 is byte1=0x31; byte2=0x75; RelAddr8 & A_Bit7 {}
+
+# BF PSW.0, $addr20
+:BF PSW_Bit0,RelAddr8 is byte1=0x31; byte2=0x84; byte3=0xFA; RelAddr8 & PSW_Bit0 {}
+
+# BF PSW.1, $addr20
+:BF PSW_Bit1,RelAddr8 is byte1=0x31; byte2=0x94; byte3=0xFA; RelAddr8 & PSW_Bit1 {}
+
+# BF PSW.2, $addr20
+:BF PSW_Bit2,RelAddr8 is byte1=0x31; byte2=0xA4; byte3=0xFA; RelAddr8 & PSW_Bit2 {}
+
+# BF PSW.3, $addr20
+:BF PSW_Bit3,RelAddr8 is byte1=0x31; byte2=0xB4; byte3=0xFA; RelAddr8 & PSW_Bit3 {}
+
+# BF PSW.4, $addr20
+:BF PSW_Bit4,RelAddr8 is byte1=0x31; byte2=0xC4; byte3=0xFA; RelAddr8 & PSW_Bit4 {}
+
+# BF PSW.5, $addr20
+:BF PSW_Bit5,RelAddr8 is byte1=0x31; byte2=0xD4; byte3=0xFA; RelAddr8 & PSW_Bit5 {}
+
+# BF PSW.6, $addr20
+:BF PSW_Bit6,RelAddr8 is byte1=0x31; byte2=0xE4; byte3=0xFA; RelAddr8 & PSW_Bit6 {}
+
+# BF PSW.7, $addr20
+:BF PSW_Bit7,RelAddr8 is byte1=0x31; byte2=0xF4; byte3=0xFA; RelAddr8 & PSW_Bit7 {}
+
+# BF [HL].0, $addr20
+:BF AddrHL_Bit0,RelAddr8 is byte1=0x31; byte2=0x85; AddrHL_Bit0; RelAddr8 {}
+
+# BF [HL].1, $addr20
+:BF AddrHL_Bit1,RelAddr8 is byte1=0x31; byte2=0x95; AddrHL_Bit1; RelAddr8 {}
+
+# BF [HL].2, $addr20
+:BF AddrHL_Bit2,RelAddr8 is byte1=0x31; byte2=0xA5; AddrHL_Bit2; RelAddr8 {}
+
+# BF [HL].3, $addr20
+:BF AddrHL_Bit3,RelAddr8 is byte1=0x31; byte2=0xB5; AddrHL_Bit3; RelAddr8 {}
+
+# BF [HL].4, $addr20
+:BF AddrHL_Bit4,RelAddr8 is byte1=0x31; byte2=0xC5; AddrHL_Bit4; RelAddr8 {}
+
+# BF [HL].5, $addr20
+:BF AddrHL_Bit5,RelAddr8 is byte1=0x31; byte2=0xD5; AddrHL_Bit5; RelAddr8 {}
+
+# BF [HL].6, $addr20
+:BF AddrHL_Bit6,RelAddr8 is byte1=0x31; byte2=0xE5; AddrHL_Bit6; RelAddr8 {}
+
+# BF [HL].7, $addr20
+:BF AddrHL_Bit7,RelAddr8 is byte1=0x31; byte2=0xF5; AddrHL_Bit7; RelAddr8 {}
+
+# BF ES:[HL].0, $addr20
+:BF ESAddrHL_Bit0,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0x85; ESAddrHL_Bit0; RelAddr8 {}
+
+# BF ES:[HL].1, $addr20
+:BF ESAddrHL_Bit1,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0x95; ESAddrHL_Bit1; RelAddr8 {}
+
+# BF ES:[HL].2, $addr20
+:BF ESAddrHL_Bit2,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xA5; ESAddrHL_Bit2; RelAddr8 {}
+
+# BF ES:[HL].3, $addr20
+:BF ESAddrHL_Bit3,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xB5; ESAddrHL_Bit3; RelAddr8 {}
+
+# BF ES:[HL].4, $addr20
+:BF ESAddrHL_Bit4,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xC5; ESAddrHL_Bit4; RelAddr8 {}
+
+# BF ES:[HL].5, $addr20
+:BF ESAddrHL_Bit5,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xD5; ESAddrHL_Bit5; RelAddr8 {}
+
+# BF ES:[HL].6, $addr20
+:BF ESAddrHL_Bit6,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xE5; ESAddrHL_Bit6; RelAddr8 {}
+
+# BF ES:[HL].7, $addr20
+:BF ESAddrHL_Bit7,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xF5; ESAddrHL_Bit7; RelAddr8 {}
+
+# BTCLR saddr.0, $addr20
+:BTCLR ShortAddr_Bit0,RelAddr8 is byte1=0x31; byte2=0x00; ShortAddr_Bit0; RelAddr8 {}
+
+# BTCLR saddr.1, $addr20
+:BTCLR ShortAddr_Bit1,RelAddr8 is byte1=0x31; byte2=0x10; ShortAddr_Bit1; RelAddr8 {}
+
+# BTCLR saddr.2, $addr20
+:BTCLR ShortAddr_Bit2,RelAddr8 is byte1=0x31; byte2=0x20; ShortAddr_Bit2; RelAddr8 {}
+
+# BTCLR saddr.3, $addr20
+:BTCLR ShortAddr_Bit3,RelAddr8 is byte1=0x31; byte2=0x30; ShortAddr_Bit3; RelAddr8 {}
+
+# BTCLR saddr.4, $addr20
+:BTCLR ShortAddr_Bit4,RelAddr8 is byte1=0x31; byte2=0x40; ShortAddr_Bit4; RelAddr8 {}
+
+# BTCLR saddr.5, $addr20
+:BTCLR ShortAddr_Bit5,RelAddr8 is byte1=0x31; byte2=0x50; ShortAddr_Bit5; RelAddr8 {}
+
+# BTCLR saddr.6, $addr20
+:BTCLR ShortAddr_Bit6,RelAddr8 is byte1=0x31; byte2=0x60; ShortAddr_Bit6; RelAddr8 {}
+
+# BTCLR saddr.7, $addr20
+:BTCLR ShortAddr_Bit7,RelAddr8 is byte1=0x31; byte2=0x70; ShortAddr_Bit7; RelAddr8 {}
+
+# BTCLR sfr.0, $addr20
+:BTCLR Sfr_Bit0,RelAddr8 is byte1=0x31; byte2=0x80; Sfr_Bit0; RelAddr8 {}
+
+# BTCLR sfr.1, $addr20
+:BTCLR Sfr_Bit1,RelAddr8 is byte1=0x31; byte2=0x90; Sfr_Bit1; RelAddr8 {}
+
+# BTCLR sfr.2, $addr20
+:BTCLR Sfr_Bit2,RelAddr8 is byte1=0x31; byte2=0xA0; Sfr_Bit2; RelAddr8 {}
+
+# BTCLR sfr.3, $addr20
+:BTCLR Sfr_Bit3,RelAddr8 is byte1=0x31; byte2=0xB0; Sfr_Bit3; RelAddr8 {}
+
+# BTCLR sfr.4, $addr20
+:BTCLR Sfr_Bit4,RelAddr8 is byte1=0x31; byte2=0xC0; Sfr_Bit4; RelAddr8 {}
+
+# BTCLR sfr.5, $addr20
+:BTCLR Sfr_Bit5,RelAddr8 is byte1=0x31; byte2=0xD0; Sfr_Bit5; RelAddr8 {}
+
+# BTCLR sfr.6, $addr20
+:BTCLR Sfr_Bit6,RelAddr8 is byte1=0x31; byte2=0xE0; Sfr_Bit6; RelAddr8 {}
+
+# BTCLR sfr.7, $addr20
+:BTCLR Sfr_Bit7,RelAddr8 is byte1=0x31; byte2=0xF0; Sfr_Bit7; RelAddr8 {}
+
+# BTCLR A.0, $addr20
+:BTCLR A_Bit0,RelAddr8 is byte1=0x31; byte2=0x01; RelAddr8 & A_Bit0 {}
+
+# BTCLR A.1, $addr20
+:BTCLR A_Bit1,RelAddr8 is byte1=0x31; byte2=0x11; RelAddr8 & A_Bit1 {}
+
+# BTCLR A.2, $addr20
+:BTCLR A_Bit2,RelAddr8 is byte1=0x31; byte2=0x21; RelAddr8 & A_Bit2 {}
+
+# BTCLR A.3, $addr20
+:BTCLR A_Bit3,RelAddr8 is byte1=0x31; byte2=0x31; RelAddr8 & A_Bit3 {}
+
+# BTCLR A.4, $addr20
+:BTCLR A_Bit4,RelAddr8 is byte1=0x31; byte2=0x41; RelAddr8 & A_Bit4 {}
+
+# BTCLR A.5, $addr20
+:BTCLR A_Bit5,RelAddr8 is byte1=0x31; byte2=0x51; RelAddr8 & A_Bit5 {}
+
+# BTCLR A.6, $addr20
+:BTCLR A_Bit6,RelAddr8 is byte1=0x31; byte2=0x61; RelAddr8 & A_Bit6 {}
+
+# BTCLR A.7, $addr20
+:BTCLR A_Bit7,RelAddr8 is byte1=0x31; byte2=0x71; RelAddr8 & A_Bit7 {}
+
+# BTCLR PSW.0, $addr20
+:BTCLR PSW_Bit0,RelAddr8 is byte1=0x31; byte2=0x80; byte3=0xFA; RelAddr8 & PSW_Bit0 {}
+
+# BTCLR PSW.1, $addr20
+:BTCLR PSW_Bit1,RelAddr8 is byte1=0x31; byte2=0x90; byte3=0xFA; RelAddr8 & PSW_Bit1 {}
+
+# BTCLR PSW.2, $addr20
+:BTCLR PSW_Bit2,RelAddr8 is byte1=0x31; byte2=0xA0; byte3=0xFA; RelAddr8 & PSW_Bit2 {}
+
+# BTCLR PSW.3, $addr20
+:BTCLR PSW_Bit3,RelAddr8 is byte1=0x31; byte2=0xB0; byte3=0xFA; RelAddr8 & PSW_Bit3 {}
+
+# BTCLR PSW.4, $addr20
+:BTCLR PSW_Bit4,RelAddr8 is byte1=0x31; byte2=0xC0; byte3=0xFA; RelAddr8 & PSW_Bit4 {}
+
+# BTCLR PSW.5, $addr20
+:BTCLR PSW_Bit5,RelAddr8 is byte1=0x31; byte2=0xD0; byte3=0xFA; RelAddr8 & PSW_Bit5 {}
+
+# BTCLR PSW.6, $addr20
+:BTCLR PSW_Bit6,RelAddr8 is byte1=0x31; byte2=0xE0; byte3=0xFA; RelAddr8 & PSW_Bit6 {}
+
+# BTCLR PSW.7, $addr20
+:BTCLR PSW_Bit7,RelAddr8 is byte1=0x31; byte2=0xF0; byte3=0xFA; RelAddr8 & PSW_Bit7 {}
+
+# BTCLR [HL].0, $addr20
+:BTCLR AddrHL_Bit0,RelAddr8 is byte1=0x31; byte2=0x81; AddrHL_Bit0; RelAddr8 {}
+
+# BTCLR [HL].1, $addr20
+:BTCLR AddrHL_Bit1,RelAddr8 is byte1=0x31; byte2=0x91; AddrHL_Bit1; RelAddr8 {}
+
+# BTCLR [HL].2, $addr20
+:BTCLR AddrHL_Bit2,RelAddr8 is byte1=0x31; byte2=0xA1; AddrHL_Bit2; RelAddr8 {}
+
+# BTCLR [HL].3, $addr20
+:BTCLR AddrHL_Bit3,RelAddr8 is byte1=0x31; byte2=0xB1; AddrHL_Bit3; RelAddr8 {}
+
+# BTCLR [HL].4, $addr20
+:BTCLR AddrHL_Bit4,RelAddr8 is byte1=0x31; byte2=0xC1; AddrHL_Bit4; RelAddr8 {}
+
+# BTCLR [HL].5, $addr20
+:BTCLR AddrHL_Bit5,RelAddr8 is byte1=0x31; byte2=0xD1; AddrHL_Bit5; RelAddr8 {}
+
+# BTCLR [HL].6, $addr20
+:BTCLR AddrHL_Bit6,RelAddr8 is byte1=0x31; byte2=0xE1; AddrHL_Bit6; RelAddr8 {}
+
+# BTCLR [HL].7, $addr20
+:BTCLR AddrHL_Bit7,RelAddr8 is byte1=0x31; byte2=0xF1; AddrHL_Bit7; RelAddr8 {}
+
+# BTCLR ES:[HL].0, $addr20
+:BTCLR ESAddrHL_Bit0,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0x81; ESAddrHL_Bit0; RelAddr8 {}
+
+# BTCLR ES:[HL].1, $addr20
+:BTCLR ESAddrHL_Bit1,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0x91; ESAddrHL_Bit1; RelAddr8 {}
+
+# BTCLR ES:[HL].2, $addr20
+:BTCLR ESAddrHL_Bit2,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xA1; ESAddrHL_Bit2; RelAddr8 {}
+
+# BTCLR ES:[HL].3, $addr20
+:BTCLR ESAddrHL_Bit3,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xB1; ESAddrHL_Bit3; RelAddr8 {}
+
+# BTCLR ES:[HL].4, $addr20
+:BTCLR ESAddrHL_Bit4,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xC1; ESAddrHL_Bit4; RelAddr8 {}
+
+# BTCLR ES:[HL].5, $addr20
+:BTCLR ESAddrHL_Bit5,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xD1; ESAddrHL_Bit5; RelAddr8 {}
+
+# BTCLR ES:[HL].6, $addr20
+:BTCLR ESAddrHL_Bit6,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xE1; ESAddrHL_Bit6; RelAddr8 {}
+
+# BTCLR ES:[HL].7, $addr20
+:BTCLR ESAddrHL_Bit7,RelAddr8 is byte1=0x11; byte2=0x31; byte3=0xF1; ESAddrHL_Bit7; RelAddr8 {}
+
+###################################
+#
+## Conditional Skip Instructions
+#
+###################################
+
+# SKC 
+:SKC  is byte1=0x61; byte2=0xC8 { if (CY) goto inst_next; delayslot(1); goto inst_next; }
+
+# SKNC 
+:SKNC  is byte1=0x61; byte2=0xD8 { if (!CY) goto inst_next; delayslot(1); goto inst_next; }
+
+# SKZ 
+:SKZ  is byte1=0x61; byte2=0xE8 { if (Z) goto inst_next; delayslot(1); goto inst_next; }
+
+# SKNZ 
+:SKNZ  is byte1=0x61; byte2=0xF8 { if (!Z) goto inst_next; delayslot(1); goto inst_next; }
+
+# SKH 
+:SKH  is byte1=0x61; byte2=0xE3 { if (Z || CY) goto inst_next; delayslot(1); goto inst_next; }
+
+# SKNH 
+:SKNH  is byte1=0x61; byte2=0xF3 { if (!Z || !CY) goto inst_next; delayslot(1); goto inst_next; }
+
+###################################
+#
+## CPU Control Instructions
+#
+###################################
+
+# SEL RB0
+:SEL RB0 is byte1=0x61; byte2=0xCF & RB0 {}
+
+# SEL RB1
+:SEL RB1 is byte1=0x61; byte2=0xDF & RB1 {}
+
+# SEL RB2
+:SEL RB2 is byte1=0x61; byte2=0xEF & RB2 {}
+
+# SEL RB3
+:SEL RB3 is byte1=0x61; byte2=0xFF & RB3 {}
+
+# NOP 
+:NOP  is byte1=0x00 {}
+
+# EI 
+#:EI  is byte1=0x71; byte2=0x7A; byte3=0xFA {}
+
+# DI 
+#:DI  is byte1=0x71; byte2=0x7B; byte3=0xFA {}
+
+# HALT 
+:HALT  is byte1=0x61; byte2=0xED {}
+
+# STOP 
+:STOP  is byte1=0x61; byte2=0xFD {}
+
+# PREFIX 
+:PREFIX  is byte1=0x11 {}
+

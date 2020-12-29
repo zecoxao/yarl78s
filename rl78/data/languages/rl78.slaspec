@@ -1,0 +1,199 @@
+# Processor spec for RL78
+
+define endian=little;
+define alignment=1;
+
+define space ram        type=ram_space      size=3 wordsize=1 default;
+define space stackarea  type=ram_space      size=2;
+define space register   type=register_space size=1;
+
+# Control Registers
+define register offset=0x10 size=3 [PC];
+define register offset=0x20 size=2 [SP];
+define register offset=0x30 size=1 [PSW];
+
+define register offset=0x60 size=1 [CY ISP0 ISP1 RBS0 AC RBS1 Z IE];
+
+# General-Purpose Registers
+define register offset=0 size=1 [X A C B E D L H];
+define register offset=0 size=2 [AX  BC  DE  HL ];
+
+# ES and CS Registers
+define register offset=0x40 size=1 [ES CS];
+
+define register offset=0x50 size=1 [RB0 RB1 RB2 RB3];
+
+define token op1(8) byte1=(0,7);
+define token op2(8) byte2=(0,7);
+define token op3(8) byte3=(0,7);
+
+define token I8  (8)    imm8=(0,7)      simm8=(0,7)   signed;
+define token I16 (16)   imm16=(0,15)    simm16=(0,15) signed;
+define token I24 (24)   imm20=(0,23)    simm20=(0,23) signed;
+
+ImmByte:    "#"imm8         is imm8     { local tmp:1 = imm8; export tmp; }
+ImmWord:    "#"imm16        is imm16    { local tmp:2 = imm16; export tmp; }
+
+OffByte:    imm8            is imm8 { tmp:1 = imm8; export tmp; }
+OffWord:    imm16           is imm16 { tmp:2 = imm16; export tmp; }
+
+AbsAddr16:  imm16        is imm16 { local loc:3 = imm16; export loc; }
+AbsAddr20:  imm20        is imm20 { local loc:3 = imm20; export loc; }
+
+# These are only used by branch instructions
+# NOTE: "export *" will export the location being pointed to by addr as a reference.
+RelAddr8:   addr        is simm8  [ addr = inst_next + simm8; ]  { export *[ram]:4 addr; }
+RelAddr16:  addr        is simm16 [ addr = inst_next + simm16; ] { export *[ram]:4 addr; }
+JmpAbsAddr16:  addr     is imm16 [ addr = 0 + imm16; ] { export *[ram]:4 addr; }
+JmpAbsAddr20:  addr     is imm20 [ addr = 0 + imm20; ] { export *[ram]:4 addr; }
+
+ShortAddr:  loc         is imm8 [ loc = 0xFFE00 + imm8; ] { tmp:3 = loc; export tmp; }
+Sfr:        loc         is imm8 [ loc = 0xFFF00 + imm8; ] { tmp:3 = loc; export tmp; }
+ShortAddrP: loc         is imm8 [ loc = 0xFFE00 + imm8; ] { tmp:3 = loc; export tmp; }
+SfrP:       loc         is imm8 [ loc = 0xFFF00 + imm8; ] { tmp:3 = loc; export tmp; }
+
+AddrDE:         [DE]            is DE               { local loc:3 = zext(DE); export loc; }
+AddrDE_byte:    [DE+OffByte]    is OffByte & DE     { local loc:3 = zext(DE) + zext(OffByte); export loc; }
+AddrHL:         [HL]            is HL               { local loc:3 = zext(HL); export loc; }
+AddrHL_byte:    [HL+OffByte]    is OffByte & HL     { local loc:3 = zext(HL) + zext(OffByte); export loc; }
+AddrHL_B:       [HL+B]          is HL & B           { local loc:3 = zext(HL) + zext(B); export loc; }
+AddrHL_C:       [HL+C]          is HL & C           { local loc:3 = zext(HL) + zext(C); export loc; }
+AddrB_word:     OffWord[B]      is OffWord & B      { local loc:3 = zext(B) + zext(OffWord); export loc; }
+AddrC_word:     OffWord[C]      is OffWord & C      { local loc:3 = zext(C) + zext(OffWord); export loc; }
+AddrBC_word:    OffWord[BC]     is OffWord & BC     { local loc:3 = zext(BC) + zext(OffWord); export loc; }
+AddrSP_byte:    [SP+OffByte]    is OffByte & SP     { local loc:2 = zext(SP) + zext(OffByte); export loc; }
+
+ESAbsAddr16:    ES":"AbsAddr16      is AbsAddr16 & ES       { local tmp=0:3; tmp[0,16] = AbsAddr16; tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrDE:       ES":"[DE]           is ES & DE              { local tmp=0:3; tmp[0,16] = DE; tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrDE_byte:  ES":"[DE+OffByte]   is OffByte & ES & DE    { local tmp=0:3; tmp[0,16] = DE + zext(OffByte); tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrHL:       ES":"[HL]           is ES & HL              { local tmp=0:3; tmp[0,16] = HL; tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrHL_byte:  ES":"[HL+OffByte]   is OffByte & ES & HL    { local tmp=0:3; tmp[0,16] = HL + zext(OffByte); tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrHL_B:     ES":"[HL+B]         is ES & HL & B          { local tmp=0:3; tmp[0,16] = HL + zext(B); tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrHL_C:     ES":"[HL+C]         is ES & HL & C          { local tmp=0:3; tmp[0,16] = HL + zext(C); tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrB_word:   ES":"OffWord[B]     is OffWord & ES & B     { local tmp=0:3; tmp[0,16] = zext(B) + OffWord; tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrC_word:   ES":"OffWord[C]     is OffWord & ES & C     { local tmp=0:3; tmp[0,16] = zext(C) + OffWord; tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrBC_word:  ES":"OffWord[BC]    is OffWord & ES & BC    { local tmp=0:3; tmp[0,16] = BC + OffWord; tmp[16,4] = ES[0,4]; export tmp; }
+ESAddrSP_byte:  ES":"[SP+OffByte]   is OffByte & ES & SP    { local tmp=0:3; tmp[0,16] = SP + zext(OffByte); tmp[16,4] = ES[0,4]; export tmp; }
+
+AbsAddr16_Bit0: AbsAddr16".0"       is AbsAddr16 { local val:1 = *:1 AbsAddr16; bit = val[0,1]; export bit; }
+AbsAddr16_Bit1: AbsAddr16".1"       is AbsAddr16 { local val:1 = *:1 AbsAddr16; bit = val[1,1]; export bit; }
+AbsAddr16_Bit2: AbsAddr16".2"       is AbsAddr16 { local val:1 = *:1 AbsAddr16; bit = val[2,1]; export bit; }
+AbsAddr16_Bit3: AbsAddr16".3"       is AbsAddr16 { local val:1 = *:1 AbsAddr16; bit = val[3,1]; export bit; }
+AbsAddr16_Bit4: AbsAddr16".4"       is AbsAddr16 { local val:1 = *:1 AbsAddr16; bit = val[4,1]; export bit; }
+AbsAddr16_Bit5: AbsAddr16".5"       is AbsAddr16 { local val:1 = *:1 AbsAddr16; bit = val[5,1]; export bit; }
+AbsAddr16_Bit6: AbsAddr16".6"       is AbsAddr16 { local val:1 = *:1 AbsAddr16; bit = val[6,1]; export bit; }
+AbsAddr16_Bit7: AbsAddr16".7"       is AbsAddr16 { local val:1 = *:1 AbsAddr16; bit = val[7,1]; export bit; }
+
+ESAbsAddr16_Bit0: ESAbsAddr16".0"       is ESAbsAddr16 {}
+ESAbsAddr16_Bit1: ESAbsAddr16".1"       is ESAbsAddr16 {}
+ESAbsAddr16_Bit2: ESAbsAddr16".2"       is ESAbsAddr16 {}
+ESAbsAddr16_Bit3: ESAbsAddr16".3"       is ESAbsAddr16 {}
+ESAbsAddr16_Bit4: ESAbsAddr16".4"       is ESAbsAddr16 {}
+ESAbsAddr16_Bit5: ESAbsAddr16".5"       is ESAbsAddr16 {}
+ESAbsAddr16_Bit6: ESAbsAddr16".6"       is ESAbsAddr16 {}
+ESAbsAddr16_Bit7: ESAbsAddr16".7"       is ESAbsAddr16 {}
+
+ShortAddr_Bit0: ShortAddr".0"       is ShortAddr {}
+ShortAddr_Bit1: ShortAddr".1"       is ShortAddr {}
+ShortAddr_Bit2: ShortAddr".2"       is ShortAddr {}
+ShortAddr_Bit3: ShortAddr".3"       is ShortAddr {}
+ShortAddr_Bit4: ShortAddr".4"       is ShortAddr {}
+ShortAddr_Bit5: ShortAddr".5"       is ShortAddr {}
+ShortAddr_Bit6: ShortAddr".6"       is ShortAddr {}
+ShortAddr_Bit7: ShortAddr".7"       is ShortAddr {}
+
+Sfr_Bit0:   Sfr".0"     is Sfr {}
+Sfr_Bit1:   Sfr".1"     is Sfr {}
+Sfr_Bit2:   Sfr".2"     is Sfr {}
+Sfr_Bit3:   Sfr".3"     is Sfr {}
+Sfr_Bit4:   Sfr".4"     is Sfr {}
+Sfr_Bit5:   Sfr".5"     is Sfr {}
+Sfr_Bit6:   Sfr".6"     is Sfr {}
+Sfr_Bit7:   Sfr".7"     is Sfr {}
+
+A_Bit0: A".0"       is A {}
+A_Bit1: A".1"       is A {}
+A_Bit2: A".2"       is A {}
+A_Bit3: A".3"       is A {}
+A_Bit4: A".4"       is A {}
+A_Bit5: A".5"       is A {}
+A_Bit6: A".6"       is A {}
+A_Bit7: A".7"       is A {}
+
+PSW_Bit0: PSW".0"       is PSW {}
+PSW_Bit1: PSW".1"       is PSW {}
+PSW_Bit2: PSW".2"       is PSW {}
+PSW_Bit3: PSW".3"       is PSW {}
+PSW_Bit4: PSW".4"       is PSW {}
+PSW_Bit5: PSW".5"       is PSW {}
+PSW_Bit6: PSW".6"       is PSW {}
+PSW_Bit7: PSW".7"       is PSW {}
+
+AddrHL_Bit0: AddrHL".0"       is AddrHL {}
+AddrHL_Bit1: AddrHL".1"       is AddrHL {}
+AddrHL_Bit2: AddrHL".2"       is AddrHL {}
+AddrHL_Bit3: AddrHL".3"       is AddrHL {}
+AddrHL_Bit4: AddrHL".4"       is AddrHL {}
+AddrHL_Bit5: AddrHL".5"       is AddrHL {}
+AddrHL_Bit6: AddrHL".6"       is AddrHL {}
+AddrHL_Bit7: AddrHL".7"       is AddrHL {}
+
+ESAddrHL_Bit0: ESAddrHL".0"       is ESAddrHL {}
+ESAddrHL_Bit1: ESAddrHL".1"       is ESAddrHL {}
+ESAddrHL_Bit2: ESAddrHL".2"       is ESAddrHL {}
+ESAddrHL_Bit3: ESAddrHL".3"       is ESAddrHL {}
+ESAddrHL_Bit4: ESAddrHL".4"       is ESAddrHL {}
+ESAddrHL_Bit5: ESAddrHL".5"       is ESAddrHL {}
+ESAddrHL_Bit6: ESAddrHL".6"       is ESAddrHL {}
+ESAddrHL_Bit7: ESAddrHL".7"       is ESAddrHL {}
+
+TableAddr0080: "[0080]" is epsilon {}
+TableAddr0082: "[0082]" is epsilon {}
+TableAddr0084: "[0084]" is epsilon {}
+TableAddr0086: "[0086]" is epsilon {}
+TableAddr0088: "[0088]" is epsilon {}
+TableAddr008A: "[008A]" is epsilon {}
+TableAddr008C: "[008C]" is epsilon {}
+TableAddr008E: "[008E]" is epsilon {}
+TableAddr0090: "[0090]" is epsilon {}
+TableAddr0092: "[0092]" is epsilon {}
+TableAddr0094: "[0094]" is epsilon {}
+TableAddr0096: "[0096]" is epsilon {}
+TableAddr0098: "[0098]" is epsilon {}
+TableAddr009A: "[009A]" is epsilon {}
+TableAddr009C: "[009C]" is epsilon {}
+TableAddr009E: "[009E]" is epsilon {}
+TableAddr00A0: "[00A0]" is epsilon {}
+TableAddr00A2: "[00A2]" is epsilon {}
+TableAddr00A4: "[00A4]" is epsilon {}
+TableAddr00A6: "[00A6]" is epsilon {}
+TableAddr00A8: "[00A8]" is epsilon {}
+TableAddr00AA: "[00AA]" is epsilon {}
+TableAddr00AC: "[00AC]" is epsilon {}
+TableAddr00AE: "[00AE]" is epsilon {}
+TableAddr00B0: "[00B0]" is epsilon {}
+TableAddr00B2: "[00B2]" is epsilon {}
+TableAddr00B4: "[00B4]" is epsilon {}
+TableAddr00B6: "[00B6]" is epsilon {}
+TableAddr00B8: "[00B8]" is epsilon {}
+TableAddr00BA: "[00BA]" is epsilon {}
+TableAddr00BC: "[00BC]" is epsilon {}
+TableAddr00BE: "[00BE]" is epsilon {}
+
+macro pushWord(src) {
+    SP = SP - 2;
+    *[stackarea]:2 SP = src;
+}
+
+macro popWord(dst) {
+    dst = *[stackarea]:2 SP;
+    SP = SP + 2;
+}
+
+macro pop4(dst) {
+    dst = *[stackarea]:4 SP;
+    SP = SP + 4;
+}
+
+@include "gen.sinc"
+
