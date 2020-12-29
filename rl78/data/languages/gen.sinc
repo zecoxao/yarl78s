@@ -57,6 +57,12 @@ macro xchRegWithMem(dst,src) {
     dst = tmp;
 }
 
+macro compareRegWithReg(dst, src) {
+  Z = (src - dst) == 0;
+  CY = (src & 0x7f) < (dst & 0x7f);
+  AC = (src & 0x07) < (dst & 0x07);
+}
+
 # MOV X, #byte
 :MOV X,ImmByte is byte1=0x50; ImmByte & X { X = ImmByte; }
 
@@ -163,7 +169,7 @@ macro xchRegWithMem(dst,src) {
 :MOV ES,ImmByte is byte1=0x41; ImmByte & ES { ES = ImmByte; }
 
 # MOV ES, saddr
-:MOV ES,ShortAddr is byte1=0x61; byte2=0xB8; ShortAddr & ES {}
+:MOV ES,ShortAddr is byte1=0x61; byte2=0xB8; ShortAddr & ES { movMemToReg(ES, ShortAddr); }
 
 # MOV A, ES
 :MOV A,ES is byte1=0x8E; byte2=0xFD & A & ES { A = ES; }
@@ -639,8 +645,19 @@ macro xchRegWithRegW(dst,src) {
 # MOVW HL, saddrp
 :MOVW HL,ShortAddrP is byte1=0xFA; ShortAddrP & HL { movMemToRegW(HL,ShortAddrP); }
 
+###
+#
+# There's a minor issue with instruction decoding here. The RL78 ISA docs are not
+# 100% correct as they show MOVW HL, SP and MOVW HL, !addr16 to have the same 3-byte
+# opcode, starting with 0xFB. For now, it's better to have the correct stack manipulation
+# by assuming MOVW HL, SP.
+#
+
+# MOVW HL, SP
+:MOVW HL,SP is byte1=0xFB; ImmWord; HL & SP { HL = SP; }
+
 # MOVW HL, !addr16
-#:MOVW HL,AbsAddr16 is byte1=0xFB; AbsAddr16 & HL { movMemToRegW(HL,AbsAddr16); }
+# :MOVW HL,AbsAddr16 is byte1=0xFB; AbsAddr16 & HL { movMemToRegW(HL,AbsAddr16); }
 
 # MOVW AX, ES:!addr16
 :MOVW AX,ESAbsAddr16 is byte1=0x11; byte2=0xAF; ESAbsAddr16 & AX { movMemToRegW(AX,ESAbsAddr16); }
@@ -872,7 +889,10 @@ macro xorMemWithImm(dst,src) {
 :ADD X,A is byte1=0x61; byte2=0x00 & X & A { X = X + A; }
 
 # ADD A, A
-#:ADD A,A is byte1=0x61; byte2=0x01 & A & A { A = A + A; }
+:ADD A ("A=A+A") is byte1=0x61; byte2=0x01 & A {
+    local tmp = A;
+    A = A + tmp;
+}
 
 # ADD C, A
 :ADD C,A is byte1=0x61; byte2=0x02 & C & A { C = C + A; }
@@ -1031,7 +1051,10 @@ macro xorMemWithImm(dst,src) {
 :SUB A,D is byte1=0x61; byte2=0x2D & A & D { A = A - D; }
 
 # SUB A, L
-:SUB A,L is byte1=0x61; byte2=0x2E & A & L { A = A - L; }
+:SUB A,L is byte1=0x61; byte2=0x2E & A & L {
+    compareRegWithReg(A, L);
+    A = A - L;
+}
 
 # SUB A, H
 :SUB A,H is byte1=0x61; byte2=0x2F & A & H { A = A - H; }
@@ -1124,7 +1147,7 @@ macro xorMemWithImm(dst,src) {
 :SUBC X,A is byte1=0x61; byte2=0x30 & X & A {}
 
 # SUBC A, A
-#:SUBC A,A is byte1=0x61; byte2=0x31 & A & A {}
+:SUBC A ("A=A-A") is byte1=0x61; byte2=0x31 & A { A = A - A; }
 
 # SUBC C, A
 :SUBC C,A is byte1=0x61; byte2=0x32 & C & A {}
@@ -1429,12 +1452,6 @@ macro xorMemWithImm(dst,src) {
 # XOR A, ES:[HL+C]
 :XOR A,ESAddrHL_C is byte1=0x11; byte2=0x61; byte3=0xF2; ESAddrHL_C & A { xorRegWithMem(A,ESAddrHL_C); }
 
-macro compareRegWithReg(dst, src) {
-  Z = (src - dst) == 0;
-  CY = (src & 0x7f) < (dst & 0x7f);
-  AC = (src & 0x07) < (dst & 0x07);
-}
-
 macro compareRegWithImm(dst, src) {
   Z = (src - dst) == 0;
   CY = (src & 0x7f) < (dst & 0x7f);
@@ -1721,6 +1738,14 @@ macro compareRegWithMemW(dst,src) {
 # SUBW AX, ES:[HL+byte]
 :SUBW AX,ESAddrHL_byte is byte1=0x11; byte2=0x61; byte3=0x29; ESAddrHL_byte & AX { subMemFromRegW(AX,ESAddrHL_byte); }
 
+# MULU
+:MULU X (AX"="A"*X")			is byte1=0xD6 & X & A & AX
+{
+	local Aext:2 = zext(A:1);
+	local Xext:2 = zext(X:1);
+	AX = Aext * Xext;
+}
+
 # CMPW AX, #word
 :CMPW AX,ImmWord is byte1=0x44; ImmWord & AX { compareRegWithImmW(AX,ImmWord); }
 
@@ -1958,7 +1983,10 @@ macro decMemW(dst) {
 :SHR A,7 is byte1=0x31; byte2=0x7A & A { A = A >> 7; }
 
 # SHRW AX, 1
-:SHRW AX,1 is byte1=0x31; byte2=0x1E & AX { AX = AX >> 1; }
+:SHRW AX,1 is byte1=0x31; byte2=0x1E & AX {
+    CY = X[0, 1];
+    AX = AX >> 1;
+}
 
 # SHRW AX, 2
 :SHRW AX,2 is byte1=0x31; byte2=0x2E & AX { AX = AX >> 2; }
@@ -2237,13 +2265,25 @@ macro decMemW(dst) {
 :RORC A,1 is byte1=0x61; byte2=0xFB & A {}
 
 # ROLC A, 1
-:ROLC A,1 is byte1=0x61; byte2=0xDC & A {}
+:ROLC A,1 is byte1=0x61; byte2=0xDC & A {
+    CY = A[7, 1];
+    A = A << 1;
+    A = A | CY;
+}
 
 # ROLWC AX, 1
-:ROLWC AX,1 is byte1=0x61; byte2=0xEE & AX {}
+:ROLWC AX,1 is byte1=0x61; byte2=0xEE & AX {
+    CY = AX[15, 1];
+    AX = AX << 1;
+    X = X | CY;
+}
 
 # ROLWC BC, 1
-:ROLWC BC,1 is byte1=0x61; byte2=0xFE & BC {}
+:ROLWC BC,1 is byte1=0x61; byte2=0xFE & BC {
+    CY = BC[15, 1];
+    BC = BC << 1;
+    C = C | CY;
+}
 
 ###################################
 #
@@ -3550,9 +3590,6 @@ macro decMemW(dst) {
 # MOVW DE, SP
 :MOVW DE,SP is byte1=0xEB & DE & SP { DE = SP; }
 
-# MOVW HL, SP
-:MOVW HL,SP is byte1=0xFB & HL & SP { HL = SP; }
-
 # ADDW SP, #byte
 :ADDW SP,ImmByte is byte1=0x10; ImmByte & SP { SP = SP + sext(ImmByte); }
 
@@ -3599,7 +3636,7 @@ macro decMemW(dst) {
 :BNZ RelAddr8 is byte1=0xDF; RelAddr8 { if (!Z) goto RelAddr8; }
 
 # BH $addr20
-:BH RelAddr8 is byte1=0x61; byte2=0xC3; RelAddr8 {}
+:BH RelAddr8 is byte1=0x61; byte2=0xC3; RelAddr8 { if (Z || CY) goto RelAddr8; }
 
 # BNH $addr20
 :BNH RelAddr8 is byte1=0x61; byte2=0xD3; RelAddr8 {}
